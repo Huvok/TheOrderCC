@@ -1,0 +1,274 @@
+PARSER_BEGIN(Syntax)
+class Syntax
+{
+	public static void main(String[] args) throws ParseException
+	{
+		try
+		{
+			Syntax syntaxAnalizer = new Syntax(System.in);
+			syntaxAnalizer.Program();
+			System.out.println("Syntax is correct");
+		}
+		catch(ParseException e)
+		{
+			System.out.println(e.getMessage());
+			System.out.println("There are errors in the syntax.");
+		}
+	}
+}
+PARSER_END(Syntax)
+
+TOKEN:
+{	
+		<CALL: "call banners">{System.out.println("CALL -> " + image);}
+	|	<VAN: "van">{System.out.println("VAN -> " + image);}
+    |	<HOST: "host">{System.out.println("HOST -> " + image);}
+    |	<PLEDGE: "pledge">{System.out.println("PLEDGE -> " + image);}
+    |	<REAR: "rear">{System.out.println("REAR -> " + image);}
+}
+
+TOKEN:
+{	
+		<SCOUT: "Scout">{System.out.println("SCOUT -> " + image);}
+	|	<AT: "At">{System.out.println("AT -> " + image);}
+    |	<AS: "As">{System.out.println("AS -> " + image);}
+    |	<CLAIM: "Claim">{System.out.println("CLAIM -> " + image);}
+    |	<WHERE: "Where">{System.out.println("WHERE -> " + image);}
+    |	<ALL: "all">{System.out.println("ALL -> " + image);}
+}
+
+TOKEN:
+{	
+		<LBRACE: "{">{System.out.println("LBRACE -> " + image);}
+	|	<RBRACE: "}">{System.out.println("RBRACE -> " + image);}
+	|	<LPAR: "(">{System.out.println("LPAR -> " + image);}
+	|	<RPAR: ")">{System.out.println("RPAR -> " + image);}
+    |	<LSQUARE: "[">{System.out.println("LSQUARE -> " + image);}
+	|	<RSQUARE: "]">{System.out.println("RSQUARE -> " + image);}
+	|	<DOUBLECOLON: ":">{System.out.println("DOUBLECOLON -> " + image);}
+	|	<COMMA: ",">{System.out.println("COMMA -> " + image);}
+	|	<SEMICOLON: ";">{System.out.println("SEMICOLON -> " + image);}
+}
+
+TOKEN:
+{	
+		<INT: "int">{System.out.println("INT -> " + image);}
+    |	<STRING: "String">{System.out.println("STRING -> " + image);}
+    |	<NUM: "num">{System.out.println("NUM -> " + image);}
+}
+
+TOKEN:
+{	
+		<ASSIGNATION: "<=">{System.out.println("ASSIGNATION -> " + image + "\r\n");}
+	|	<PLUS: "+">{System.out.println("PLUS -> " + image);}
+    |	<MINUS: "-">{System.out.println("MINUS -> " + image);}
+    |	<MULT: "*">{System.out.println("MULT -> " + image);}
+    |	<DIV: "/">{System.out.println("DIV -> " + image);}
+    |	<LESSTHAN: "<">{System.out.println("LESSTHAN -> " + image);}
+    |	<MORETHAN: ">">{System.out.println("MORETHAN -> " + image);}
+    |	<EQUALS: "==">{System.out.println("EQUALS -> " + image);}
+    |	<NOTEQUALS: "!=">{System.out.println("NOTEQUALS -> " + image);}
+}
+
+TOKEN:
+{	
+		<WRITE: "Write">{System.out.println("WRITE -> " + image);}
+    |	<READ: "Read">{System.out.println("READ -> " + image);}
+    |	<CHARGE: "Charge">{System.out.println("CHARGE -> " + image);}
+}
+
+TOKEN:
+{	
+		<WHILE: "while">{System.out.println("WHILE -> " + image);}
+    |	<DO: "do">{System.out.println("DO -> " + image);}
+    |	<FOR: "for">{System.out.println("FOR -> " + image);}
+    |	<SEPARATOR: "|">{System.out.println("SEPARATOR -> " + image);}
+    |	<IF: "if">{System.out.println("IF -> " + image);}
+    |	<ELSE: "else">{System.out.println("ELSE -> " + image);}
+    |	<OR: "||">{System.out.println("OR -> " + image);}
+    |	<AND: "&&">{System.out.println("AND -> " + image);}
+}
+
+TOKEN:
+{	
+		<NUMBER: (["0"-"9"])+>{System.out.println("Number -> " + image + "\r\n");}
+	|	<ID: ["a"-"z","A"-"Z"](["a"-"z","A"-"Z","0"-"9","_"])*>{System.out.println("ID -> " + image + "\r\n");}
+}
+
+TOKEN: 
+{
+        <DOUBLEQUOTED: "\"" ("\\" ~[] | ~["\"","\\"])*"\"">{System.out.println("DOUBLEQUOTED -> " + image + "\r\n");} 
+}
+
+SKIP:
+{
+	" "|"\r\n"|"\t"
+}
+
+//======================================================================================================================
+//                                                          //SYMBOL TABLE
+
+//  TOKEN       |   RES. WORD   |   KIND
+//-----------------------------------------
+//  CALL        |   call banners|   1
+//  VAN         |   van         |   2
+//  HOST        |   host        |   3
+//  PLEDGE      |   pledge      |   4
+//  REAR        |   rear        |   5
+//  SCOUT       |   Scout       |   6
+//  AT          |   at          |   7
+//  AS          |   as          |   8
+//  CLAIM       |   Claim       |   9
+//  WHERE       |   Where       |   10
+//  ALL         |   all         |   11
+//  LBRACE      |   {           |   12
+//  RBRACE      |   }           |   13
+//  LPAR        |   (           |   14
+//  RPAR        |   )           |   15
+//  LSQUARE     |   [           |   16
+//  RSQUARE     |   ]           |   17
+//  DOUBLECOLON |   :           |   18
+//  COMMA       |   ,           |   19
+//  SEMICOLON   |   ;           |   20
+//  INT         |   int         |   21
+//  STRING      |   String      |   22
+//  NUM         |   num         |   23
+//  ASSIGNATION |   <=          |   24
+//  PLUS        |   +           |   25
+//  MINUS       |   -           |   26
+//  MULT        |   *           |   27
+//  DIV         |   /           |   28
+//  LESSTHAN    |   <           |   29
+
+
+	<ASSIGNATION: "<=">{System.out.println("ASSIGNATION -> " + image + "\r\n");}
+	|	<PLUS: "+">{System.out.println("PLUS -> " + image);}
+    |	<MINUS: "-">{System.out.println("MINUS -> " + image);}
+    |	<MULT: "*">{System.out.println("MULT -> " + image);}
+    |	<DIV: "/">{System.out.println("DIV -> " + image);}
+    |	<LESSTHAN: "<">{System.out.println("LESSTHAN -> " + image);}
+    |	<MORETHAN: ">">{System.out.println("MORETHAN -> " + image);}
+    |	<EQUALS: "==">{System.out.println("EQUALS -> " + image);}
+    |	<NOTEQUALS: "!=">{System.out.println("NOTEQUALS -> " + image);}
+void Program() :
+{
+}
+{ 
+    <CALL>{System.out.println("kind: " + token.kind);}
+	//Banners()<VAN><ID><LPAR><RPAR>B()Methods()Rear()<EOF>
+}
+
+void Banners() :
+{
+}
+{
+	(<CALL><LBRACE>(Type()<DOUBLECOLON><ID>(<COMMA><ID>)*<SEMICOLON>)+<RBRACE>)?
+}
+
+void Type() :
+{
+}
+{
+	(<INT>((<LSQUARE><NUMBER><RSQUARE>)*)) | 
+    (<STRING>((<LSQUARE><NUMBER><RSQUARE>)*)) |
+    (<NUM>((<LSQUARE><NUMBER><RSQUARE>)*))
+}
+
+void B() :
+{
+}
+{
+	<LBRACE>(((S()))+)?<RBRACE>
+}
+
+void S() :
+{
+}
+{
+	((Variable()<ASSIGNATION>)((E()) | (<READ><LPAR><RPAR>)) <SEMICOLON>) | 
+    (<WRITE><LPAR>E()<RPAR><SEMICOLON>) |
+    ((<IF>E()B())(<ELSE>B())?) |
+    (<WHILE>E()B()) |
+    (<DO>B()<WHILE>E()) |
+    (<READ><LPAR><RPAR><SEMICOLON>) |
+    (<FOR><LPAR><ID><ASSIGNATION>E()<SEPARATOR>E()<RPAR>B()) |
+    (<CHARGE><ID><LPAR><RPAR><SEMICOLON>)
+}
+
+void Variable() :
+{
+}
+{
+	<ID>((<LSQUARE>E()<RSQUARE>)*)
+}
+
+void E() :
+{
+}
+{
+	(ES())
+    ((<LESSTHAN>ES()) |
+    (<MORETHAN>ES()) |
+    (<EQUALS>ES()) |
+    (<NOTEQUALS>ES()))?
+}
+
+void ES() :
+{
+}
+{
+	T()((<PLUS>T()) | (<MINUS>T()) | (<OR>T()))*
+}
+
+void T() :
+{
+}
+{
+	f()((<MULT> | <DIV> | <AND>)f())*
+}
+
+void f() :
+{
+}
+{
+	(<ID>(((<LSQUARE>E()<RSQUARE>)*) | (<LPAR><RPAR>)))|
+    <NUMBER>|
+    (<LPAR>E()<RPAR>)|
+    (<DOUBLEQUOTED>)
+}
+
+void Methods() :
+{
+}
+{
+    ((<HOST><ID><LPAR><RPAR>B())
+    (<PLEDGE>E())?)?
+}
+
+void Rear() :
+{
+}
+{
+    (<REAR><ID><LPAR><RPAR><LBRACE>((Q())*)<RBRACE>)?
+}
+
+void Q() :
+{
+}
+{
+    (Sel()|Ins())
+}
+
+void Sel() :
+{
+}
+{
+    <SCOUT>(<ALL>|<ID>)(<COMMA><ID>)*<SEMICOLON><AT><ID><SEMICOLON><WHERE>E()<SEMICOLON>
+}
+
+void Ins() :
+{
+}
+{
+    <CLAIM><ID>(<COMMA><ID>)*<SEMICOLON><AT><ID><SEMICOLON><AS>E()(<COMMA>E())*<SEMICOLON>
+}
