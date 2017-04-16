@@ -51,8 +51,53 @@ public class TypeCheckVisitor implements SyntaxVisitor
 
 	return (node.jjtGetChild(1).jjtAccept(this, data));
     }
+    
+    public Object visit(ASTAssignation node, Object data)
+    {
+	if (((DataType)node.jjtGetChild(0).jjtAccept(this, data) == DataType.TypeInteger)
+            && ((DataType)node.jjtGetChild(1).jjtAccept(this, data) == DataType.TypeInteger))
+	    return DataType.TypeInteger;
+	else
+	    return DataType.TypeUnknown;
+    }
 
     public Object visit(ASTPLUS_op node, Object data)
+    {
+	if (((DataType)node.jjtGetChild(0).jjtAccept(this, data) == DataType.TypeInteger)
+            && ((DataType)node.jjtGetChild(1).jjtAccept(this, data) == DataType.TypeInteger))
+	    return DataType.TypeInteger;
+	else
+	    return DataType.TypeUnknown;
+    }
+    
+    public Object visit(ASTLESSTHAN_op node, Object data)
+    {
+	if (((DataType)node.jjtGetChild(0).jjtAccept(this, data) == DataType.TypeInteger)
+            && ((DataType)node.jjtGetChild(1).jjtAccept(this, data) == DataType.TypeInteger))
+	    return DataType.TypeInteger;
+	else
+	    return DataType.TypeUnknown;
+    }
+    
+    public Object visit(ASTMORETHAN_op node, Object data)
+    {
+	if (((DataType)node.jjtGetChild(0).jjtAccept(this, data) == DataType.TypeInteger)
+            && ((DataType)node.jjtGetChild(1).jjtAccept(this, data) == DataType.TypeInteger))
+	    return DataType.TypeInteger;
+	else
+	    return DataType.TypeUnknown;
+    }
+    
+    public Object visit(ASTEQUALS_op node, Object data)
+    {
+	if (((DataType)node.jjtGetChild(0).jjtAccept(this, data) == DataType.TypeInteger)
+            && ((DataType)node.jjtGetChild(1).jjtAccept(this, data) == DataType.TypeInteger))
+	    return DataType.TypeInteger;
+	else
+	    return DataType.TypeUnknown;
+    }
+    
+    public Object visit(ASTNOTEQUALS_op node, Object data)
     {
 	if (((DataType)node.jjtGetChild(0).jjtAccept(this, data) == DataType.TypeInteger)
             && ((DataType)node.jjtGetChild(1).jjtAccept(this, data) == DataType.TypeInteger))
@@ -115,6 +160,21 @@ public class TypeCheckVisitor implements SyntaxVisitor
     }
 
     public Object visit(ASTExp node, Object data)
+    {
+	return(node.jjtGetChild(0).jjtAccept(this, data));
+    }
+    
+    public Object visit(ASTWrite node, Object data)
+    {
+	return(node.jjtGetChild(0).jjtAccept(this, data));
+    }
+    
+    public Object visit(ASTIf node, Object data)
+    {
+	return(node.jjtGetChild(0).jjtAccept(this, data));
+    }
+    
+    public Object visit(ASTElse node, Object data)
     {
 	return(node.jjtGetChild(0).jjtAccept(this, data));
     }

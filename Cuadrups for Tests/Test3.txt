@@ -1,0 +1,9 @@
+1) <= 1 _ A		int
+2) <= 1 _ B		int
+3) <= "Hola" _ str	_
+4) == a b $t1		int
+5) gotoF $t1 8		_
+6) Write str _ _	_
+7) goto _ 9		_
+8) Write "Adios" _ _	_
+9)

@@ -40,6 +40,46 @@ public class PrintVisitor implements SyntaxVisitor
 	node.jjtGetChild(1).jjtAccept(this, data);
 	return data;
     }
+    
+    public Object visit(ASTAssignation node, Object data)
+    {
+	node.jjtGetChild(0).jjtAccept(this, data);
+	System.out.print(" " + node.value + " ");
+	node.jjtGetChild(1).jjtAccept(this, data);
+	return data;
+    }
+    
+    public Object visit(ASTLESSTHAN_op node, Object data)
+    {
+	node.jjtGetChild(0).jjtAccept(this, data);
+	System.out.print(" " + node.value + " ");
+	node.jjtGetChild(1).jjtAccept(this, data);
+	return data;
+    }
+    
+    public Object visit(ASTMORETHAN_op node, Object data)
+    {
+	node.jjtGetChild(0).jjtAccept(this, data);
+	System.out.print(" " + node.value + " ");
+	node.jjtGetChild(1).jjtAccept(this, data);
+	return data;
+    }
+    
+    public Object visit(ASTEQUALS_op node, Object data)
+    {
+	node.jjtGetChild(0).jjtAccept(this, data);
+	System.out.print(" " + node.value + " ");
+	node.jjtGetChild(1).jjtAccept(this, data);
+	return data;
+    }
+    
+    public Object visit(ASTNOTEQUALS_op node, Object data)
+    {
+	node.jjtGetChild(0).jjtAccept(this, data);
+	System.out.print(" " + node.value + " ");
+	node.jjtGetChild(1).jjtAccept(this, data);
+	return data;
+    }
 
     public Object visit(ASTPLUS_op node, Object data)
     {
@@ -100,6 +140,27 @@ public class PrintVisitor implements SyntaxVisitor
 	System.out.print("(");
 	node.jjtGetChild(0).jjtAccept(this, data);
 	System.out.print(")");
+	return(data);
+    }
+    
+    public Object visit(ASTWrite node, Object data)
+    {
+    System.out.println(node.value);
+	node.jjtGetChild(0).jjtAccept(this, data);
+	return(data);
+    }
+    
+    public Object visit(ASTIf node, Object data)
+    {
+    System.out.println(node.value);
+	node.jjtGetChild(0).jjtAccept(this, data);
+	return(data);
+    }
+    
+    public Object visit(ASTElse node, Object data)
+    {
+    System.out.println(node.value);
+	node.jjtGetChild(0).jjtAccept(this, data);
 	return(data);
     }
 

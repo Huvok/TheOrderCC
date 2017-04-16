@@ -257,14 +257,50 @@ void Statement() #void :
 {
 }
 {
-    (SimpleStatement() <SEMICOLON> [Statement() #Statement(2)])
+    (SimpleStatement() [Statement() #Statement(2)])
 }
 
 void SimpleStatement() #void :
 {
 }
 {
-    Expression()
+    LOOKAHEAD(2)
+    (Assignation() <SEMICOLON>) |
+    (Expression() <SEMICOLON>) |
+    (Write() <SEMICOLON>) |
+    If()
+}
+
+void Assignation() #void :
+{
+    Token t;
+}
+{
+    ID() t = <ASSIGNATION> Expression() #Assignation(2)
+}
+
+void Write() :
+{
+    Token t;
+}
+{
+    t = <WRITE> <LPAR> Expression() <RPAR>
+}
+
+void If() :
+{
+    Token t;
+}
+{
+    t = <IF> ComposedExpression() <LBRACE>(Statement())?<RBRACE> (Else())?
+}
+
+void Else() :
+{
+    Token t;
+}
+{
+    t = <ELSE> Body()
 }
 
 /*void S() #void :
@@ -291,6 +327,30 @@ void Variable() :
 	t = <ID>((<LSQUARE>E()<RSQUARE>)*)
     {jjtThis.value = t.image;}
 }*/
+void ComposedExpression() #void :
+{
+    Token t;
+}
+{
+    (Expression())
+    ((t = <LESSTHAN> Expression()
+     {
+         jjtThis.value = t.image;
+     } #LESSTHAN_op(2)) |
+    (t = <MORETHAN> Expression()
+    {
+         jjtThis.value = t.image;
+     } #MORETHAN_op(2)) |
+    (t = <EQUALS> Expression()
+    {
+         jjtThis.value = t.image;
+     } #EQUALS_op(2)) |
+    (t = <NOTEQUALS> Expression()
+    {
+         jjtThis.value = t.image;
+     } #NOTEQUALS_op(2)))?
+    
+}
 
 void Expression() #void :
 {
@@ -325,18 +385,6 @@ void Term() #void :
     (t = <AND> Factor() {jjtThis.value = t.image;} #AND_op(2)))*)
 }
 
-void E() #Void :
-{
-    Token t;
-}
-{
-	(ES())
-    ((t = <LESSTHAN>ES()) |
-    (t = <MORETHAN>ES()) |
-    (t = <EQUALS>ES()) |
-    (t = <NOTEQUALS>ES()))?
-}
-
 void ES() #void :
 {
     Token t;
@@ -357,7 +405,7 @@ void Factor() #void :
 {
 }
 {
-    (<LPAR> Expression() #Exp(1) <RPAR> |
+    (<LPAR> ComposedExpression() #Exp(1) <RPAR> |
     Number() |
     ID() |
     String())
@@ -393,9 +441,9 @@ void f() #void:
     Token t;
 }
 {
-	((t = <ID>(((<LSQUARE>E()<RSQUARE>)*) | (<LPAR><RPAR>)))|
+	((t = <ID>(((<LSQUARE>ComposedExpression()<RSQUARE>)*) | (<LPAR><RPAR>)))|
     t = <NUMBER>|
-    (<LPAR>E()<RPAR>)|
+    (<LPAR>ComposedExpression()<RPAR>)|
     (t = <DOUBLEQUOTED>))
 }
 
@@ -404,7 +452,7 @@ void Methods() #void :
 }
 {
     ((<HOST><ID><LPAR><RPAR>Body())
-    (<PLEDGE>E())?)?
+    (<PLEDGE>ComposedExpression())?)?
 }
 
 void Rear() #void :
@@ -425,12 +473,12 @@ void Sel() #void :
 {
 }
 {
-    <SCOUT>(<ALL>|<ID>)(<COMMA><ID>)*<SEMICOLON><AT><ID><SEMICOLON><WHERE>E()<SEMICOLON>
+    <SCOUT>(<ALL>|<ID>)(<COMMA><ID>)*<SEMICOLON><AT><ID><SEMICOLON><WHERE>ComposedExpression()<SEMICOLON>
 }
 
 void Ins() #void :
 {
 }
 {
-    <CLAIM><ID>(<COMMA><ID>)*<SEMICOLON><AT><ID><SEMICOLON><AS>E()(<COMMA>E())*<SEMICOLON>
+    <CLAIM><ID>(<COMMA><ID>)*<SEMICOLON><AT><ID><SEMICOLON><AS>ComposedExpression()(<COMMA>ComposedExpression())*<SEMICOLON>
 }
