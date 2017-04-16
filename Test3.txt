@@ -1,6 +1,7 @@
 call banners
 {
-    int: a, b;
+    int: a;
+    int: b;
     String: str;
 }
 

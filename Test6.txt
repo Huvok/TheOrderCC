@@ -1,0 +1,11 @@
+call banners
+{
+	int: a;
+	int: b;
+}
+
+van Programa2()
+{
+	2+3;
+	a*(b-3);
+}

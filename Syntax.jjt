@@ -1,0 +1,436 @@
+options 
+{
+  IGNORE_CASE = false;
+  OPTIMIZE_TOKEN_MANAGER = true;
+  MULTI = true;
+  VISITOR = true;
+}
+
+PARSER_BEGIN(Syntax)
+    
+import java.io.*;
+import java.util.*;
+
+public class Syntax
+{
+    public static Hashtable ST = new Hashtable();
+    
+	public static void main(String[] args) throws ParseException
+	{
+        String temp;
+        STC temp2;
+        
+		try
+		{
+			Syntax syntaxAnalizer = new Syntax(System.in);
+            SimpleNode root = syntaxAnalizer.Program();
+            System.out.println("Syntax is correct.");
+            System.out.println();
+            System.out.println("Abstract Syntax Tree:");
+            root.dump(" ");
+            System.out.println();
+            System.out.println("Symbol Table:");
+            Enumeration t = ST.keys();
+
+            while (t.hasMoreElements())
+            {
+                temp = (String)t.nextElement();
+                temp2 = (STC)ST.get(temp);
+                System.out.println(temp);
+                if (temp2.type != null)
+                {
+                    System.out.println(" type = " + temp2.type);
+                }
+                
+                if (temp2.value != null)
+                {
+                    System.out.println(" value = " + temp2.value);
+                }
+            }
+            
+            System.out.println();
+            System.out.println("Program:");
+            PrintVisitor pv = new PrintVisitor();
+            root.jjtAccept(pv, null);
+
+            System.out.println();
+            System.out.println("Type Checking:");
+            TypeCheckVisitor tc = new TypeCheckVisitor();
+            root.jjtAccept(tc, ST);    
+		}
+		catch(ParseException e)
+		{
+			System.out.println(e.getMessage());
+			System.out.println("There are errors in the syntax.");
+		}
+	}
+}
+PARSER_END(Syntax)
+    
+TOKEN_MGR_DECLS:
+{
+    static int linenumber = 0;
+}
+
+SKIP:
+{
+	" " |
+    "\n" {linenumber++;}|
+    "\r" |
+    "\r\n" |
+    "\t"
+}
+
+TOKEN:
+{	
+		<CALL: "call banners">{System.out.println("CALL -> " + image);}
+	|	<VAN: "van">{System.out.println("VAN -> " + image);}
+    |	<HOST: "host">{System.out.println("HOST -> " + image);}
+    |	<PLEDGE: "pledge">{System.out.println("PLEDGE -> " + image);}
+    |	<REAR: "rear">{System.out.println("REAR -> " + image);}
+}
+
+TOKEN:
+{	
+		<SCOUT: "Scout">{System.out.println("SCOUT -> " + image);}
+	|	<AT: "At">{System.out.println("AT -> " + image);}
+    |	<AS: "As">{System.out.println("AS -> " + image);}
+    |	<CLAIM: "Claim">{System.out.println("CLAIM -> " + image);}
+    |	<WHERE: "Where">{System.out.println("WHERE -> " + image);}
+    |	<ALL: "all">{System.out.println("ALL -> " + image);}
+}
+
+TOKEN:
+{	
+		<LBRACE: "{">{System.out.println("LBRACE -> " + image);}
+	|	<RBRACE: "}">{System.out.println("RBRACE -> " + image);}
+	|	<LPAR: "(">{System.out.println("LPAR -> " + image);}
+	|	<RPAR: ")">{System.out.println("RPAR -> " + image);}
+    |	<LSQUARE: "[">{System.out.println("LSQUARE -> " + image);}
+	|	<RSQUARE: "]">{System.out.println("RSQUARE -> " + image);}
+	|	<DOUBLECOLON: ":">{System.out.println("DOUBLECOLON -> " + image);}
+	|	<COMMA: ",">{System.out.println("COMMA -> " + image);}
+	|	<SEMICOLON: ";">{System.out.println("SEMICOLON -> " + image);}
+}
+
+TOKEN:
+{	
+		<INT: "int">{System.out.println("INT -> " + image);}
+    |	<STRING: "String">{System.out.println("STRING -> " + image);}
+    |	<BOOLEAN: "boolean">{System.out.println("BOOLEAN -> " + image);}
+}
+
+TOKEN:
+{	
+		<ASSIGNATION: "<=">{System.out.println("ASSIGNATION -> " + image + "\r\n");}
+	|	<PLUS: "+">{System.out.println("PLUS -> " + image);}
+    |	<MINUS: "-">{System.out.println("MINUS -> " + image);}
+    |	<MULT: "*">{System.out.println("MULT -> " + image);}
+    |	<DIV: "/">{System.out.println("DIV -> " + image);}
+    |	<LESSTHAN: "<">{System.out.println("LESSTHAN -> " + image);}
+    |	<MORETHAN: ">">{System.out.println("MORETHAN -> " + image);}
+    |	<EQUALS: "==">{System.out.println("EQUALS -> " + image);}
+    |	<NOTEQUALS: "!=">{System.out.println("NOTEQUALS -> " + image);}
+}
+
+TOKEN:
+{	
+		<WRITE: "Write">{System.out.println("WRITE -> " + image);}
+    |	<READ: "Read">{System.out.println("READ -> " + image);}
+    |	<CHARGE: "Charge">{System.out.println("CHARGE -> " + image);}
+}
+
+TOKEN:
+{	
+		<WHILE: "while">{System.out.println("WHILE -> " + image);}
+    |	<DO: "do">{System.out.println("DO -> " + image);}
+    |	<FOR: "for">{System.out.println("FOR -> " + image);}
+    |	<SEPARATOR: "|">{System.out.println("SEPARATOR -> " + image);}
+    |	<IF: "if">{System.out.println("IF -> " + image);}
+    |	<ELSE: "else">{System.out.println("ELSE -> " + image);}
+    |	<OR: "||">{System.out.println("OR -> " + image);}
+    |	<AND: "&&">{System.out.println("AND -> " + image);}
+    |	<NOT: "!">{System.out.println("NOT -> " + image);}
+}
+
+TOKEN:
+{	
+		<NUMBER: (["0"-"9"])+>{System.out.println("Number -> " + image + "\r\n");}
+	|	<ID: ["a"-"z","A"-"Z"](["a"-"z","A"-"Z","0"-"9","_"])*>{System.out.println("ID -> " + image + "\r\n");}
+}
+
+TOKEN: 
+{
+        <DOUBLEQUOTED: "\"" ("\\" ~[] | ~["\"","\\"])*"\"">{System.out.println("DOUBLEQUOTED -> " + image + "\r\n");} 
+}
+
+//======================================================================================================================
+//                                                          //SYMBOL TABLE
+
+//  TOKEN       |   RES. WORD   |   KIND
+//-----------------------------------------
+//  CALL        |   call banners|   1
+//  VAN         |   van         |   2
+//  HOST        |   host        |   3
+//  PLEDGE      |   pledge      |   4
+//  REAR        |   rear        |   5
+//  SCOUT       |   Scout       |   6
+//  AT          |   at          |   7
+//  AS          |   as          |   8
+//  CLAIM       |   Claim       |   9
+//  WHERE       |   Where       |   10
+//  ALL         |   all         |   11
+//  LBRACE      |   {           |   12
+//  RBRACE      |   }           |   13
+//  LPAR        |   (           |   14
+//  RPAR        |   )           |   15
+//  LSQUARE     |   [           |   16
+//  RSQUARE     |   ]           |   17
+//  DOUBLECOLON |   :           |   18
+//  COMMA       |   ,           |   19
+//  SEMICOLON   |   ;           |   20
+//  INT         |   int         |   21
+//  STRING      |   String      |   22
+//  BOOLEAN     |   boolean     |   23
+//  ASSIGNATION |   <=          |   24
+//  PLUS        |   +           |   25
+//  MINUS       |   -           |   26
+//  MULT        |   *           |   27
+//  DIV         |   /           |   28
+//  LESSTHAN    |   <           |   29
+
+SimpleNode Program() :
+{
+    Token t;
+}
+{ 
+    Banners()<VAN> t = <ID><LPAR><RPAR>Body()Methods()Rear()<EOF>
+    {jjtThis.value = t.image;}
+    {return jjtThis;}
+}
+
+void Banners() #void :
+{
+}
+{
+	(<CALL><LBRACE>Declaration()<RBRACE>)?
+}
+
+void Declaration() #void :
+{
+}
+{
+    (SimpleDeclaration()<SEMICOLON>[Declaration() #Declaration(2)])
+}
+
+void SimpleDeclaration() #void : 
+{
+    Token t;
+    String name;
+}
+{
+    (t = <INT> <DOUBLECOLON> name = ID() 
+    {
+        jjtThis.value = t.image;
+        ST.put(name, new STC("int", name));
+    } #Decl(1)) | 
+    (t = <BOOLEAN> <DOUBLECOLON> name = ID() 
+    {
+        jjtThis.value = t.image;
+        ST.put(name, new STC("boolean", name));
+    } #Decl(1)) | 
+    (t = <STRING> <DOUBLECOLON> name = ID() 
+    {
+        jjtThis.value = t.image;
+        ST.put(name, new STC("String", name));
+    } #Decl(1))
+}
+
+void Body() #void :
+{
+}
+{
+	<LBRACE>(Statement())?<RBRACE>
+}
+
+void Statement() #void :
+{
+}
+{
+    (SimpleStatement() <SEMICOLON> [Statement() #Statement(2)])
+}
+
+void SimpleStatement() #void :
+{
+}
+{
+    Expression()
+}
+
+/*void S() #void :
+{
+    Token t;
+}
+{
+	(((Variable() t = <ASSIGNATION>)((E()) | (<READ><LPAR><RPAR>)) <SEMICOLON>) | 
+    (<WRITE><LPAR>E()<RPAR><SEMICOLON>) |
+    ((<IF>E()B())(<ELSE>B())?) |
+    (<WHILE>E()B()) |
+    (<DO>B()<WHILE>E()) |
+    (<READ><LPAR><RPAR><SEMICOLON>) |
+    (<FOR><LPAR><ID><ASSIGNATION>E()<SEPARATOR>E()<RPAR>B()) |
+    (<CHARGE><ID><LPAR><RPAR><SEMICOLON>))
+    {jjtThis.value = t.image;}
+}
+
+void Variable() :
+{
+    Token t;
+}
+{
+	t = <ID>((<LSQUARE>E()<RSQUARE>)*)
+    {jjtThis.value = t.image;}
+}*/
+
+void Expression() #void :
+{
+    Token t;
+}
+{
+    Term()
+    (
+        (t = <PLUS> Term()
+         {
+             jjtThis.value = t.image;
+         } #PLUS_op(2)) |
+        (t = <MINUS> Term()
+         {
+             jjtThis.value = t.image;
+         } #MINUS_op(2)) |
+        (t = <OR> Term()
+         {
+             jjtThis.value = t.image;
+         } #OR_op(2))
+    )*
+}
+
+void Term() #void :
+{
+    Token t;
+}
+{
+    (<NOT> Factor() #NOT_op(1)) |
+    (Factor() ((t = <MULT> Factor() {jjtThis.value = t.image;} #MULT_op(2)) |
+    (t = <DIV> Factor() {jjtThis.value = t.image;} #DIV_op(2)) |
+    (t = <AND> Factor() {jjtThis.value = t.image;} #AND_op(2)))*)
+}
+
+void E() #Void :
+{
+    Token t;
+}
+{
+	(ES())
+    ((t = <LESSTHAN>ES()) |
+    (t = <MORETHAN>ES()) |
+    (t = <EQUALS>ES()) |
+    (t = <NOTEQUALS>ES()))?
+}
+
+void ES() #void :
+{
+    Token t;
+}
+{
+	T()((t = <PLUS>T()) | (t = <MINUS>T()) | (t = <OR>T()))*
+}
+
+void T() #void:
+{
+    Token t;
+}
+{
+	f()((t = <MULT> | t = <DIV> | t = <AND>)f())*
+}
+              
+void Factor() #void :
+{
+}
+{
+    (<LPAR> Expression() #Exp(1) <RPAR> |
+    Number() |
+    ID() |
+    String())
+}
+              
+void Number() :
+{
+  Token t;
+}
+{
+    t = <NUMBER> {jjtThis.value = t.image;}
+}
+              
+String ID() :
+{
+  Token t;
+}
+{
+    t = <ID> {jjtThis.value = t.image;
+             return t.image;}
+}
+              
+void String() :
+{
+  Token t;
+}
+{
+    t = <DOUBLEQUOTED> {jjtThis.value = t.image;}
+}
+              
+void f() #void:
+{
+    Token t;
+}
+{
+	((t = <ID>(((<LSQUARE>E()<RSQUARE>)*) | (<LPAR><RPAR>)))|
+    t = <NUMBER>|
+    (<LPAR>E()<RPAR>)|
+    (t = <DOUBLEQUOTED>))
+}
+
+void Methods() #void :
+{
+}
+{
+    ((<HOST><ID><LPAR><RPAR>Body())
+    (<PLEDGE>E())?)?
+}
+
+void Rear() #void :
+{
+}
+{
+    (<REAR><ID><LPAR><RPAR><LBRACE>((Q())*)<RBRACE>)?
+}
+
+void Q() #void :
+{
+}
+{
+    (Sel()|Ins())
+}
+
+void Sel() #void :
+{
+}
+{
+    <SCOUT>(<ALL>|<ID>)(<COMMA><ID>)*<SEMICOLON><AT><ID><SEMICOLON><WHERE>E()<SEMICOLON>
+}
+
+void Ins() #void :
+{
+}
+{
+    <CLAIM><ID>(<COMMA><ID>)*<SEMICOLON><AT><ID><SEMICOLON><AS>E()(<COMMA>E())*<SEMICOLON>
+}

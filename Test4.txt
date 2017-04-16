@@ -1,6 +1,8 @@
 call banners
 {
-    int: a, b, c;
+    int: a;
+    int: b;
+    int: c;
 }
 
 van Programa4()
