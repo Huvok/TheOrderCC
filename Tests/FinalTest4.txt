@@ -1,0 +1,44 @@
+call banners
+{
+    int[10]: a;
+	int: intX;
+	int: intIndex;
+}
+
+van FinalTest2()
+{
+    Write("Escriba los 10 valores del vector:");
+	
+	for (i <= 0 | i < 10)
+	{
+		a[i] <= Read();
+	}
+	
+	Write("Que valor desea buscar?");
+	intX <= Read();
+	intIndex <= 15;
+	
+	Charge search();
+}
+
+host search()
+{
+    for (i <= 0 | i < 10)
+	{
+		if (a[i] == intX)
+		{
+			intIndex <= i;
+		}
+	}
+	
+	if (intIndex == 15)
+	{
+		Write("No se encontro el numero.");
+	}
+	else
+	{
+		Write(" ");
+		Write("El numero se encontro en la posicion: ");
+		Write(intIndex);
+	}
+}

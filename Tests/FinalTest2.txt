@@ -1,0 +1,58 @@
+call banners
+{
+    int[10]: a;
+    int: intN;
+    int: intOption;
+    int: intAux;
+    int: intIndex;
+    int: intTemp;
+}
+
+van FinalTest2()
+{
+    intOption <= 1;
+    while (intOption == 1)
+    {
+    	Write("Escriba el tamaño del vector: ");
+    	intN <= Read();
+
+	Write("Escriba los valores del vector: ");
+        for (i <= 0 | i < intN)
+	{
+	    a[i] <= Read();
+	}
+
+	Charge sort();
+
+	Write("Desea ordenar otro vector? 1) Si 2) No");
+	intOption <= Read();
+    }
+}
+
+host sort()
+{
+	Write("-----");
+    for (i <= 0 | i < intN)
+    {
+		intAux <= a[i];
+		intIndex <= i;
+		for (j <= i | j < intN)
+		{
+			if (a[j] < intAux)
+			{	
+				intAux <= a[j];
+				intIndex <= j;
+			}
+		}
+		
+		intTemp <= a[i];	
+		a[i] <= intAux;
+		a[intIndex] <= intTemp;
+		
+	}
+
+    for (i <= 0 | i < intN)
+    {
+		Write(a[i]);
+    }
+}

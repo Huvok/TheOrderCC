@@ -1,5 +1,6 @@
 PARSER_BEGIN(Syntax)
 import java.util.*;
+import java.io.*;
 class Syntax
 {
     //                                                      //Symbol table format:
@@ -14,20 +15,32 @@ class Syntax
     static Stack<String> stackOperators = new Stack<String>();
     static Stack<String> stackTypes = new Stack<String>();
     static Stack<Integer> stackJumps = new Stack<Integer>();
+    static Stack<String> stackForIds = new Stack<String>();
     static ArrayList<ArrayList<String>> lstlststrQuadruples = new ArrayList<ArrayList<String>>();
     static int intTemporalPointer = 0;
-    static String[] strTemporals = new String[500];
+    static int[] intTemporals = new int[500];
     static int intInstructionCount = 0;
     static String strCurrentMethod;
 
     static Map<String, Integer> mapMethodLines = new HashMap<String, Integer>();
     static Map<String, Integer> mapMethodLinesToReturn = new HashMap<String, Integer>();
 
-	public static void main(String[] args) throws ParseException
+    static Map<String, Integer> mapIntVariables = new HashMap<String, Integer>();
+    static Map<String, ArrayList<Integer>> mapIntArrays = new HashMap<String, ArrayList<Integer>>();
+    static Map<String, ArrayList<ArrayList<Integer>>> mapIntMatrix = new HashMap<String, ArrayList<ArrayList<Integer>>>();
+    static Map<String, Integer> mapForVariables = new HashMap<String, Integer>();
+
+	public static void main(String[] args) throws ParseException, FileNotFoundException
 	{
 		try
 		{
-			Syntax syntaxAnalizer = new Syntax(System.in);
+            if (args.length < 1)
+            {
+              System.out.println("Please pass in the filename.");
+              System.exit(1);
+            }
+
+			Syntax syntaxAnalizer = new Syntax(new FileInputStream(args[0]));
 			syntaxAnalizer.Program();
 			System.out.println("Syntax is correct");
 		}
@@ -47,6 +60,46 @@ class Syntax
                 lstlststrSymbolTable.get(intI).get(0) + "\t|\t" +
                 lstlststrSymbolTable.get(intI).get(1) + "\t|\t" +
                 lstlststrSymbolTable.get(intI).get(2));
+
+            if (lstlststrSymbolTable.get(intI).get(0).equals("int") &&
+                lstlststrSymbolTable.get(intI).get(1).equals("0"))
+            {
+                mapIntVariables.put(lstlststrSymbolTable.get(intI).get(2), 0);
+            }
+
+            if (lstlststrSymbolTable.get(intI).get(0).equals("int") &&
+                lstlststrSymbolTable.get(intI).get(1).charAt(0) == '1')
+            {
+                mapIntArrays.put(lstlststrSymbolTable.get(intI).get(2), 
+                    new ArrayList<Integer>());
+
+                for (int intJ = 0; intJ < Integer.parseInt(lstlststrSymbolTable.get(intI).get(1).substring(2, 4))
+                    ; intJ++)
+                {
+                    mapIntArrays.get(lstlststrSymbolTable.get(intI).get(2)).add(0);
+                }
+            }
+
+            if (lstlststrSymbolTable.get(intI).get(0).equals("int") &&
+                lstlststrSymbolTable.get(intI).get(1).charAt(0) == '2')
+            {
+                mapIntMatrix.put(lstlststrSymbolTable.get(intI).get(2), 
+                    new ArrayList<ArrayList<Integer>>());
+
+                for (int intJ = 0; intJ < Integer.parseInt(lstlststrSymbolTable.get(intI).get(1).substring(2, 3))
+                    ; intJ++)
+                {
+                    ArrayList<Integer> lst = new ArrayList<Integer>();
+
+                    for (int intK = 0; intK < Integer.parseInt(lstlststrSymbolTable.get(intI).get(1).
+                        substring(4, 5)); intK++)
+                    {
+                        lst.add(0);
+                    }
+
+                    mapIntMatrix.get(lstlststrSymbolTable.get(intI).get(2)).add(lst);
+                }
+            }
         }
 
         System.out.println();
@@ -72,6 +125,483 @@ class Syntax
         {
             System.out.println(" " + intAux + " |   " + entry.getKey() + "\t|   " + entry.getValue());
             intAux++;
+        }
+
+        System.out.println();
+        System.out.println("****************************************************************");
+        System.out.println("***********************TheOrderCC Execution*********************");
+        System.out.println("****************************************************************");
+        System.out.println();
+
+        String strQ1;
+        String strQ2;
+        String strQ3;
+        String strQ4;
+
+        for (int intI = 0; intI < 500; intI++)
+        {
+            intTemporals[intI] = 0;
+        }
+
+        Scanner scan = new Scanner(System.in);
+        for (int intI = 0; intI < lstlststrQuadruples.size(); intI++)
+        {
+            //System.out.println("#: " + (intI + 1));
+            strQ1 = lstlststrQuadruples.get(intI).get(0);
+            strQ2 = lstlststrQuadruples.get(intI).get(2);
+            strQ3 = lstlststrQuadruples.get(intI).get(1);
+            strQ4 = lstlststrQuadruples.get(intI).get(3);
+
+            if (strQ1.equals("<="))
+            {
+                if (strQ2.charAt(0) == 't')
+                {
+                    if (strQ4.length() > 6 &&
+                    strQ4.charAt(strQ4.length() - 1) == ']' &&
+                    strQ4.charAt(strQ4.length() - 4) == ']')
+                    {
+                        String strIndexI4 = strQ4.substring(strQ4.length() - 5, strQ4.length() - 4);
+                        String strIndexJ4 = strQ4.substring(strQ4.length() - 2, strQ4.length() - 1);
+                        mapIntMatrix.get(strQ4.substring(0, strQ4.length() - 6)).get(mapForVariables.get(strIndexI4)).set(mapForVariables.get(strIndexJ4), 
+                            intTemporals[Integer.parseInt(strQ2.substring(1))]);
+                    }
+                    else
+                    {
+                        mapIntVariables.put(strQ4, intTemporals[Integer.parseInt(strQ2.substring(1))]);
+                    }
+                }
+                else if(strQ2.length() > 3 &&
+                    mapIntArrays.containsKey(strQ2.substring(0, strQ2.length() - 3)) &&
+                    strQ2.charAt(strQ2.length() - 1) == ']')
+                {
+                    String strIndex = strQ2.substring(strQ2.length() - 2, strQ2.length() - 1);
+                    mapIntVariables.put(strQ4, mapIntArrays.get(strQ2.substring(0, strQ2.length() - 3)).get(mapForVariables.get(strIndex)));
+                }
+                else if (mapForVariables.containsKey(strQ2))
+                {
+                    mapIntVariables.put(strQ4, mapForVariables.get(strQ2));
+                }
+                //                                          //Asignation from a variable
+                else if (Character.isLetter(strQ2.charAt(0)))
+                {
+                    int intCounter = 0;
+                    while (intCounter < strQ4.length() && strQ4.charAt(intCounter) != '[')
+                    {
+                        intCounter++;
+                    }
+                    String strVariable = "";
+                    if (intCounter + 1 < strQ4.length())
+                    {
+                        strVariable = strQ4.substring(intCounter + 1, strQ4.length() - 1);
+                    }
+                    if (strQ4.length() > 6 &&
+                    strQ4.charAt(strQ4.length() - 1) == ']' &&
+                    strQ4.charAt(strQ4.length() - 4) == ']')
+                    {
+                        String strIndexI4 = strQ4.substring(strQ4.length() - 5, strQ4.length() - 4);
+                        String strIndexJ4 = strQ4.substring(strQ4.length() - 2, strQ4.length() - 1);
+                        mapIntMatrix.get(strQ4.substring(0, strQ4.length() - 6)).get(mapForVariables.get(strIndexI4)).set(mapForVariables.get(strIndexJ4), 
+                            mapIntVariables.get(strQ2));
+                    }
+                    else if(strQ4.length() > 3 &&
+                        mapIntArrays.containsKey(strQ4.substring(0, intCounter)) &&
+                        mapIntVariables.containsKey(strVariable))
+                    {
+                        mapIntArrays.get(strQ4.substring(0, intCounter)).set(mapIntVariables.get(strVariable), mapIntVariables.get(strQ2));
+                    }
+                    else if(strQ4.length() > 3 &&
+                        strQ4.charAt(strQ4.length() - 1) == ']')
+                    {
+                        String strIndex = strQ4.substring(strQ4.length() - 2, strQ4.length() - 1);
+                        mapIntArrays.get(strQ4.substring(0, intCounter)).set(mapForVariables.get(strIndex), mapIntVariables.get(strQ2));
+                    }
+                    else
+                    {
+                        mapIntVariables.put(strQ4, mapIntVariables.get(strQ2));
+                    }
+                }
+                else
+                {
+                    mapIntVariables.put(strQ4, Integer.parseInt(strQ2));
+                }
+            }
+            //                                              //Sum.
+            else if (strQ1.equals("+"))
+            {
+                //                                          //Matrix sum
+                if (strQ2.length() > 6 &&
+                    strQ3.length() > 6 &&
+                    strQ2.charAt(strQ2.length() - 1) == ']' &&
+                    strQ2.charAt(strQ2.length() - 4) == ']' &&
+                    strQ3.charAt(strQ3.length() - 1) == ']' &&
+                    strQ3.charAt(strQ3.length() - 4) == ']')
+                {
+                    String strIndexI2 = strQ2.substring(strQ2.length() - 5, strQ2.length() - 4);
+                    String strIndexJ2 = strQ2.substring(strQ2.length() - 2, strQ2.length() - 1);
+                    String strIndexI3 = strQ3.substring(strQ2.length() - 5, strQ2.length() - 4);
+                    String strIndexJ3 = strQ3.substring(strQ2.length() - 2, strQ2.length() - 1);
+                    if (mapForVariables.containsKey(strIndexI2) &&
+                        mapForVariables.containsKey(strIndexJ2))
+                    {
+                        intTemporals[Integer.parseInt(strQ4.substring(1))] = 
+                            mapIntMatrix.get(strQ2.substring(0, strQ2.length() - 6)).get(mapForVariables.get(strIndexI2)).get(mapForVariables.get(strIndexJ2)) + 
+                            mapIntMatrix.get(strQ3.substring(0, strQ3.length() - 6)).get(mapForVariables.get(strIndexI3)).get(mapForVariables.get(strIndexJ3));
+                    }
+                }
+                //                                          //For temporals.
+                else if (strQ2.charAt(0) == 't' ||
+                    strQ3.charAt(0) == 't')
+                {
+                    if (Character.isLetter(strQ2.charAt(0)) &&
+                        strQ3.charAt(0) == 't')
+                    {
+                        intTemporals[Integer.parseInt(strQ4.substring(1))] = mapIntVariables.get(strQ2) +
+                            intTemporals[Integer.parseInt(strQ3.substring(1))];
+                    }
+                    else
+                    {
+                        mapForVariables.put(strQ4, mapForVariables.get(strQ4) + 
+                            Integer.parseInt(strQ3));
+                    }
+                }
+                //                                          //Q2 is variable and Q3 number.
+                else if (Character.isLetter(strQ2.charAt(0)) &&
+                    !Character.isLetter(strQ3.charAt(0)))
+                {
+                    if (mapForVariables.containsKey(strQ4))
+                    {
+                        mapForVariables.put(strQ4, mapForVariables.get(strQ4) + 1);
+                    }
+                    else if (strQ4.charAt(0) == 't')
+                    {
+                        intTemporals[Integer.parseInt(strQ4.substring(1))] = mapIntVariables.get(strQ2) +
+                            Integer.parseInt(strQ3);
+                    }
+
+                }
+                //                                          //Q2 is number and Q3 variable.
+                else if (!Character.isLetter(strQ2.charAt(0)) &&
+                    Character.isLetter(strQ3.charAt(0)))
+                {
+
+                }
+                //                                          //Both are variables.
+                else if (Character.isLetter(strQ2.charAt(0)) &&
+                    Character.isLetter(strQ3.charAt(0)))
+                {
+                    intTemporals[Integer.parseInt(strQ4.substring(1))] = mapIntVariables.get(strQ2) + 
+                        mapIntVariables.get(strQ3);
+                }
+                //                                          //Both are numbers.
+                else
+                {
+                    intTemporals[Integer.parseInt(strQ4.substring(1))] = Integer.parseInt(strQ2) + 
+                        Integer.parseInt(strQ3);
+                }
+            }
+            else if (strQ1.equals("-"))
+            {
+                intTemporals[Integer.parseInt(strQ4.substring(1))] = mapIntVariables.get(strQ2) - 
+                Integer.parseInt(strQ3);
+            }
+            else if (strQ1.equals("Write"))
+            {
+                if (mapForVariables.containsKey(strQ2))
+                {
+                    System.out.println(mapForVariables.get(strQ2));
+                }
+                else if (strQ2.length() > 6 &&
+                    strQ2.charAt(strQ2.length() - 1) == ']' &&
+                    strQ2.charAt(strQ2.length() - 4) == ']')
+                {
+                    String strIndexIForRead = strQ2.substring(strQ2.length() - 5, strQ2.length() - 4);
+                    String strIndexJForRead = strQ2.substring(strQ2.length() - 2, strQ2.length() - 1);
+                    System.out.println(mapIntMatrix.get(strQ2.substring(0, strQ2.length() - 6)).get(mapForVariables.get(strIndexIForRead)).get(mapForVariables.get(strIndexJForRead)));
+                }   
+                else if(strQ2.length() > 3 &&
+                        mapIntArrays.containsKey(strQ2.substring(0, strQ2.length() - 3)))
+                {
+                    String strIndex = strQ2.substring(strQ2.length() - 2, strQ2.length() - 1);
+                    System.out.println(mapIntArrays.get(strQ2.substring(0, strQ2.length() - 3)).get(mapForVariables.get(strIndex)));
+                } 
+                else
+                {
+                    if (strQ2.charAt(0) == 't')
+                    {
+                        System.out.println(intTemporals[Integer.parseInt(strQ2.substring(1))]);
+                    }
+                    else if (Character.isLetter(strQ2.charAt(0)))
+                    {
+                        System.out.println(mapIntVariables.get(strQ2));
+                    }
+                    else
+                    {
+                        System.out.println(strQ2);
+                    }
+                }
+            }
+            else if (strQ1.equals("*"))
+            {
+                if (strQ2.length() > 6 &&
+                    strQ3.length() > 6 &&
+                    strQ2.charAt(strQ2.length() - 1) == ']' &&
+                    strQ2.charAt(strQ2.length() - 4) == ']' &&
+                    strQ3.charAt(strQ3.length() - 1) == ']' &&
+                    strQ3.charAt(strQ3.length() - 4) == ']')
+                {
+                    String strIndexI2 = strQ2.substring(strQ2.length() - 5, strQ2.length() - 4);
+                    String strIndexJ2 = strQ2.substring(strQ2.length() - 2, strQ2.length() - 1);
+                    String strIndexI3 = strQ3.substring(strQ2.length() - 5, strQ2.length() - 4);
+                    String strIndexJ3 = strQ3.substring(strQ2.length() - 2, strQ2.length() - 1);
+                    if (mapForVariables.containsKey(strIndexI2) &&
+                        mapForVariables.containsKey(strIndexJ2))
+                    {
+                        intTemporals[Integer.parseInt(strQ4.substring(1))] = 
+                            mapIntMatrix.get(strQ2.substring(0, strQ2.length() - 6)).get(mapForVariables.get(strIndexI2)).get(mapForVariables.get(strIndexJ2)) * 
+                            mapIntMatrix.get(strQ3.substring(0, strQ3.length() - 6)).get(mapForVariables.get(strIndexI3)).get(mapForVariables.get(strIndexJ3));
+                    }
+                }
+                else if (Character.isLetter(strQ2.charAt(0)) &&
+                        Character.isLetter(strQ3.charAt(0)))
+                {
+                    intTemporals[Integer.parseInt(strQ4.substring(1))] = mapIntVariables.get(strQ2) * 
+                        mapIntVariables.get(strQ3);
+                }
+            }
+            else if (strQ1.equals("/"))
+            {
+                if (Character.isLetter(strQ2.charAt(0)) &&
+                        Character.isLetter(strQ3.charAt(0)))
+                {
+                    intTemporals[Integer.parseInt(strQ4.substring(1))] = mapIntVariables.get(strQ2) /
+                        mapIntVariables.get(strQ3);
+                }
+            }
+            else if (strQ1.equals("Read"))
+            {
+                if(strQ4.length() > 6 &&
+                    mapIntMatrix.containsKey(strQ4.substring(0, strQ4.length() - 6)))
+                {
+                    String strIndexI = strQ4.substring(strQ4.length() - 5, strQ4.length() - 4);
+                    String strIndexJ = strQ4.substring(strQ4.length() - 2, strQ4.length() - 1);
+                    mapIntMatrix.get(strQ4.substring(0, strQ4.length() - 6)).get(mapForVariables.get(strIndexI)).set(mapForVariables.get(strIndexJ), scan.nextInt());
+                }
+                else if(strQ4.length() > 3 &&
+                    mapIntArrays.containsKey(strQ4.substring(0, strQ4.length() - 3)))
+                {
+                    String strIndex = strQ4.substring(strQ4.length() - 2, strQ4.length() - 1);
+                    mapIntArrays.get(strQ4.substring(0, strQ4.length() - 3)).set(mapForVariables.get(strIndex), scan.nextInt());
+                }
+                else
+                {
+                    mapIntVariables.put(strQ4, scan.nextInt());
+                }
+            }
+            else if (strQ1.equals("For"))
+            {
+                if (!lstlststrQuadruples.get(intI + 1).get(0).equals("<="))
+                {
+                    intTemporals[Integer.parseInt(lstlststrQuadruples.get(intI + 1).get(3).substring(1))] = 
+                        mapForVariables.get(lstlststrQuadruples.get(intI + 1).get(2));
+
+                    mapForVariables.put(strQ4, intTemporals[Integer.parseInt(lstlststrQuadruples.get(intI + 1).get(3).substring(1))]);
+
+                    intI += 2;
+                }
+                else if (mapForVariables.containsKey(lstlststrQuadruples.get(intI + 1).get(2)))
+                {
+                    mapForVariables.put(strQ4, mapForVariables.get(lstlststrQuadruples.get(intI + 1).get(2)));
+                    intI += 1;
+                }
+                else
+                {
+                    mapForVariables.put(strQ4, Integer.parseInt(lstlststrQuadruples.get(intI + 1).get(2)));
+                    intI += 1;
+                }
+            }
+            else if (strQ1.equals("=="))
+            {
+                if(strQ2.length() > 3 &&
+                    strQ2.charAt(strQ2.length() - 1) == ']')
+                {
+                    String strIndex = strQ2.substring(strQ2.length() - 2, strQ2.length() - 1);
+                    if (mapIntArrays.get(strQ2.substring(0, strQ2.length() - 3)).get(mapForVariables.get(strIndex)) == mapIntVariables.get(strQ3))
+                    {
+                        intTemporals[Integer.parseInt(strQ4.substring(1))] = 1;
+                    }
+                    else
+                    {
+                        intTemporals[Integer.parseInt(strQ4.substring(1))] = 0;
+                    }
+                }
+                else if (Character.isLetter(strQ2.charAt(0)) &&
+                    Character.isLetter(strQ3.charAt(0)))
+                {
+                    if (mapIntVariables.get(strQ2) == mapIntVariables.get(strQ3))
+                    {
+                        intTemporals[Integer.parseInt(strQ4.substring(1))] = 1;
+                    }
+                    else
+                    {
+                        intTemporals[Integer.parseInt(strQ4.substring(1))] = 0;
+                    }
+                }
+                else if (Character.isLetter(strQ2.charAt(0)) &&
+                    !Character.isLetter(strQ3.charAt(0)))
+                {
+                    if (mapIntVariables.get(strQ2) == Integer.parseInt(strQ3))
+                    {
+                        intTemporals[Integer.parseInt(strQ4.substring(1))] = 1;
+                    }
+                    else
+                    {
+                        intTemporals[Integer.parseInt(strQ4.substring(1))] = 0;
+                    }
+                }
+            }
+            else if (strQ1.equals(">"))
+            {
+                //                                          //Both are variables.
+                if (Character.isLetter(strQ2.charAt(0)) &&
+                    Character.isLetter(strQ3.charAt(0)))
+                {
+                    if (mapIntVariables.get(strQ2) > mapIntVariables.get(strQ3))
+                    {
+                        intTemporals[Integer.parseInt(strQ4.substring(1))] = 1;
+                    }
+                    else
+                    {
+                        intTemporals[Integer.parseInt(strQ4.substring(1))] = 0;
+                    }
+                }
+                //                                          //Q2 is variable and Q3 is number.
+                else if (Character.isLetter(strQ2.charAt(0)) &&
+                    !Character.isLetter(strQ3.charAt(0)))
+                {
+                    if (mapIntVariables.get(strQ2) > Integer.parseInt(strQ3))
+                    {
+                        intTemporals[Integer.parseInt(strQ4.substring(1))] = 1;
+                    }
+                    else
+                    {
+                        intTemporals[Integer.parseInt(strQ4.substring(1))] = 0;
+                    }
+                }
+            }
+            else if (strQ1.equals("<"))
+            {
+                if (mapForVariables.containsKey(strQ2))
+                {
+                    //                                      //Comparison against variable
+                    if (Character.isLetter(strQ3.charAt(0)))
+                    {
+                        if (mapForVariables.containsKey(strQ2) && mapForVariables.containsKey(strQ3))
+                        {
+                            if (mapForVariables.get(strQ2) < mapForVariables.get(strQ3))
+                            {
+                                intTemporals[Integer.parseInt(strQ4.substring(1))] = 1;
+                            }
+                            else
+                            {
+                                intTemporals[Integer.parseInt(strQ4.substring(1))] = 0;
+                            }
+                        }
+                        else
+                        {
+                            if (mapForVariables.get(strQ2) < mapIntVariables.get(strQ3))
+                            {
+                                intTemporals[Integer.parseInt(strQ4.substring(1))] = 1;
+                            }
+                            else
+                            {
+                                intTemporals[Integer.parseInt(strQ4.substring(1))] = 0;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        if (mapForVariables.get(strQ2) < Integer.parseInt(strQ3))
+                        {
+                            intTemporals[Integer.parseInt(strQ4.substring(1))] = 1;
+                        }
+                        else
+                        {
+                            intTemporals[Integer.parseInt(strQ4.substring(1))] = 0;
+                        }
+                    }
+                }
+                else if(strQ2.length() > 3 &&
+                    mapIntArrays.containsKey(strQ2.substring(0, strQ2.length() - 3)))
+                {
+                    String strIndex = strQ2.substring(strQ2.length() - 2, strQ2.length() - 1);
+                    
+                    if (mapIntArrays.get(strQ2.substring(0, strQ2.length() - 3)).get(mapForVariables.get(strIndex)) < 
+                        mapIntVariables.get(strQ3))
+                    {
+                        intTemporals[Integer.parseInt(strQ4.substring(1))] = 1;
+                    }
+                    else
+                    {
+                        intTemporals[Integer.parseInt(strQ4.substring(1))] = 0;
+                    }
+                }
+                else if (Character.isLetter(strQ2.charAt(0)) &&
+                    Character.isLetter(strQ3.charAt(0)))
+                {
+                    if (mapIntVariables.get(strQ2) < mapIntVariables.get(strQ3))
+                    {
+                        intTemporals[Integer.parseInt(strQ4.substring(1))] = 1;
+                    }
+                    else
+                    {
+                        intTemporals[Integer.parseInt(strQ4.substring(1))] = 0;
+                    }
+                }
+                //                                          //Q2 is variable and Q3 is number.
+                else if (Character.isLetter(strQ2.charAt(0)) &&
+                    !Character.isLetter(strQ3.charAt(0)))
+                {
+                    if (mapIntVariables.get(strQ2) < Integer.parseInt(strQ3))
+                    {
+                        intTemporals[Integer.parseInt(strQ4.substring(1))] = 1;
+                    }
+                    else
+                    {
+                        intTemporals[Integer.parseInt(strQ4.substring(1))] = 0;
+                    }
+                }
+            }
+            else if (strQ1.equals("goto"))
+            {
+                //                                          //Common goto.
+                if (strQ2.equals("_"))
+                {
+                    intI = Integer.parseInt(strQ4) - 2;
+                }
+                //                                          //goto method.
+                else
+                {
+                    intI = mapMethodLines.get(strQ4) - 2;
+                }
+            }
+            else if (strQ1.equals("gotot"))
+            {
+                if (intTemporals[Integer.parseInt(strQ2.substring(1))] == 1)
+                {
+                    intI = Integer.parseInt(strQ4) - 2;
+                }
+            }
+            else if (strQ1.equals("gotof"))
+            {
+                if (intTemporals[Integer.parseInt(strQ2.substring(1))] == 0)
+                {
+                    intI = Integer.parseInt(strQ4) - 2;
+                }
+            }
+            else if (strQ1.equals("EOM"))
+            {
+                System.exit(0);
+            }
         }
 	}
 
@@ -260,10 +790,36 @@ void S() :
     ((E()) | (<READ>{stackOperands.push("Sys.in");
                     stackOperators.push("Read");}
                     <LPAR><RPAR>)) <SEMICOLON>{lststrToAdd = new ArrayList<String>();
-                                                lststrToAdd.add(stackOperators.pop());
+                                                if (stackOperators.peek().equals("Read"))
+                                                {
+                                                    lststrToAdd.add(stackOperators.pop());
+
+                                                    //      //Take out the "<=".
+                                                    stackOperators.pop();
+                                                }
+                                                else
+                                                {
+                                                    lststrToAdd.add(stackOperators.pop());
+                                                }
+                                                
                                                 lststrToAdd.add("_");
-                                                lststrToAdd.add(stackOperands.pop());
+
                                                 String strOperandToTest = stackOperands.pop();
+
+                                                if (strOperandToTest.charAt(0) == '[')
+                                                {
+                                                    strOperandToTest = stackOperands.pop() + strOperandToTest;
+
+                                                    if (strOperandToTest.charAt(0) == '[')
+                                                    {
+                                                        strOperandToTest = stackOperands.pop() + strOperandToTest;
+                                                    }
+                                                }
+
+                                                lststrToAdd.add(strOperandToTest);
+
+
+                                                strOperandToTest = stackOperands.pop();
 
                                                 if (strOperandToTest.charAt(0) == '[')
                                                 {
@@ -373,7 +929,10 @@ void S() :
                     lstlststrQuadruples.get(intDirToFill).add((intInstructionCount + 1) + "");
             }) |
     (<DO>{stackJumps.push(intInstructionCount + 1);}
-        B()<WHILE>E(){strOperand = stackOperands.pop();
+        B()<WHILE>{stackOperators.push("While");}
+        E(){
+                    stackOperators.pop();
+                    strOperand = stackOperands.pop();
                     strType = stackTypes.pop();
                     if (strType.equals("boolean"))
                     {
@@ -395,12 +954,13 @@ void S() :
                             lstlststrQuadruples.add(lststrToAdd);
                             intInstructionCount++;}
                             ) |
-    (<FOR><LPAR><ID>{lststrToAdd = new ArrayList<String>();
+    (<FOR>{stackOperators.push("For");}<LPAR><ID>{lststrToAdd = new ArrayList<String>();
                     lststrToAdd.add("For");
                     lststrToAdd.add("_");
                     lststrToAdd.add("_");
                     lststrToAdd.add(token.toString());
                     stackOperands.push(token.toString());
+                    stackForIds.push(token.toString());
                     lstlststrQuadruples.add(lststrToAdd);
                     intInstructionCount++;}
         <ASSIGNATION>{stackOperators.push(token.toString());}
@@ -425,14 +985,16 @@ void S() :
                     lstlststrQuadruples.add(lststrToAdd);
                     intInstructionCount++;
                 }}
-            <RPAR>B(){
+                //                                          //Take out the "For".
+            <RPAR>{stackOperators.pop();}B(){
                     intDirToFill = stackJumps.pop();
                     lstlststrQuadruples.get(intDirToFill).add((intInstructionCount + 3) + "");
                     lststrToAdd = new ArrayList<String>();
                     lststrToAdd.add("+");
                     lststrToAdd.add("1");
-                    lststrToAdd.add("i");
-                    lststrToAdd.add("i");
+                    String strForId = stackForIds.pop();
+                    lststrToAdd.add(strForId);
+                    lststrToAdd.add(strForId);
                     lstlststrQuadruples.add(lststrToAdd);
                     intInstructionCount++;
 
@@ -461,7 +1023,8 @@ void Variable() :
 {
 }
 {
-    ((<ID>{stackOperands.push(token.toString());
+    ((<ID>{String strId = token.toString();
+            stackOperands.push(token.toString());
             for (int intI = 0; intI < lstlststrSymbolTable.size(); intI++)
             {
                 if (lstlststrSymbolTable.get(intI).get(2).equals(token.toString()))
@@ -472,7 +1035,8 @@ void Variable() :
             }}) 
         ((<LSQUARE>{stackOperators.push("[");}ES(){
             String strOperand = stackOperands.pop();
-            stackOperands.push("[" + strOperand + "]");}
+            stackOperands.push("[" + strOperand + "]");
+            }
             <RSQUARE>{stackOperators.pop();})(<LSQUARE>{stackOperators.push("[");}ES(){
             strOperand = stackOperands.pop();
             stackOperands.push("[" + strOperand + "]");}
@@ -488,7 +1052,20 @@ void E() :
     ES(){lststrToAdd = new ArrayList<String>();
         lststrToAdd.add(stackOperators.pop());
         lststrToAdd.add(stackOperands.pop());
-        lststrToAdd.add(stackOperands.pop());
+        String strOperandToTest = stackOperands.pop();
+
+        if (strOperandToTest.charAt(0) == '[')
+        {
+            strOperandToTest = stackOperands.pop() + strOperandToTest;
+
+            if (strOperandToTest.charAt(0) == '[')
+            {
+                strOperandToTest = stackOperands.pop() + strOperandToTest;
+            }
+        }
+
+        lststrToAdd.add(strOperandToTest);
+       
         lststrToAdd.add("t" + intTemporalPointer);
         lstlststrQuadruples.add(lststrToAdd);
         intInstructionCount++;
@@ -511,7 +1088,19 @@ void E() :
     ES(){lststrToAdd = new ArrayList<String>();
         lststrToAdd.add(stackOperators.pop());
         lststrToAdd.add(stackOperands.pop());
-        lststrToAdd.add(stackOperands.pop());
+        strOperandToTest = stackOperands.pop();
+
+        if (strOperandToTest.charAt(0) == '[')
+        {
+            strOperandToTest = stackOperands.pop() + strOperandToTest;
+
+            if (strOperandToTest.charAt(0) == '[')
+            {
+                strOperandToTest = stackOperands.pop() + strOperandToTest;
+            }
+        }
+
+        lststrToAdd.add(strOperandToTest);
         lststrToAdd.add("t" + intTemporalPointer);
         lstlststrQuadruples.add(lststrToAdd);
         intInstructionCount++;
@@ -679,8 +1268,32 @@ void T() :
     {
         lststrToAdd = new ArrayList<String>();
         lststrToAdd.add(stackOperators.pop());
-        lststrToAdd.add(stackOperands.pop());
-        lststrToAdd.add(stackOperands.pop());
+
+        String strOperandToTest1 = stackOperands.pop();
+        if (strOperandToTest1.charAt(0) == '[')
+        {
+            strOperandToTest1 = stackOperands.pop() + strOperandToTest1;
+
+            if (strOperandToTest1.charAt(0) == '[')
+            {
+                strOperandToTest1 = stackOperands.pop() + strOperandToTest1;
+            }
+        }
+
+        String strOperandToTest2 = stackOperands.pop();
+        if (strOperandToTest2.charAt(0) == '[')
+        {
+            strOperandToTest2 = stackOperands.pop() + strOperandToTest2;
+
+            if (strOperandToTest2.charAt(0) == '[')
+            {
+                strOperandToTest2 = stackOperands.pop() + strOperandToTest2;
+            }
+        }
+
+        lststrToAdd.add(strOperandToTest1);
+        lststrToAdd.add(strOperandToTest2);
+
         lststrToAdd.add("t" + intTemporalPointer);
         lstlststrQuadruples.add(lststrToAdd);
         intInstructionCount++;

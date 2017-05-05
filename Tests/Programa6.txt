@@ -105,5 +105,28 @@ host multiplicar()
 
 host sumar()
 {
+    intD1c <= intD1a;
+    intD2c <= intD2a;
 
+    if (intD1a == intD1b)
+    {
+        if (intD2a == intD2b)
+        {
+	    for (i <= 0 | i < intD1a)
+	    {
+		for (j <= 0 | j < intD2a)
+		{
+		    c[i][j] <= a[i][j] + b[i][j];
+		}
+	    }
+        }
+	else
+	{
+	    Write("No se pueden sumar.");
+	}
+    }
+    else
+    {
+	Write("No se pueden sumar.");
+    }
 }

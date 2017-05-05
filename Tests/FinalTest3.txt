@@ -1,0 +1,90 @@
+call banners
+{
+    int: intOption;
+    int: intX;
+    int: intY;
+    int: intResult, intAux1, intAux2, intAux3;
+}
+
+van FinalTest2()
+{
+    do
+    {
+		Write("Elija una opcion: 1) X! 2) X^Y 3) e^x\n");
+		intOption <= Read();
+
+		intX <= Read();
+		if (intOption == 1)
+		{
+			Charge factorial();
+		}
+		
+		if (intOption == 2)
+		{
+			intY <= Read();
+			Charge xtoy();
+		}
+
+		if (intOption == 3)
+		{
+			Charge exp();
+		}
+			
+		Write("Desea hacer otro calculo? 1) Si 2) No");
+		intOption <= Read();
+    }
+    while (intOption == 1)
+}
+
+host factorial()
+{
+    intResult <= intX;
+	Write(intResult);
+    while (intX > 1)
+    {
+		intX <= intX - 1;
+		intResult <= intResult * intX;
+    }
+
+    Write("X! = ");
+    Write(intResult);
+}
+
+host xtoy()
+{
+    intResult <= 1;
+    for (i <= 0 | i < intY)
+    {
+	intResult <= intResult * intX;
+    }
+
+    Write("X^Y = ");
+    Write(intResult);
+}
+
+host exp()
+{
+    intResult <= 1;
+    for (i <= 1 | i < 11)
+    {
+		intAux1 <= 1;
+		for (j <= 0 | j < i)
+    	{
+			intAux1 <= intAux1 * intX;
+    	}
+
+		intAux2 <= i;
+		intAux3 <= intAux2;
+		while (intAux2 > 1)
+    	{
+			Write(intAux3);
+			intAux2 <= intAux2 - 1;
+			intAux3 <= intAux3 * intAux2;
+    	}
+
+	intResult <= intResult + intAux1 / intAux3;
+    }
+
+    Write("e^X = ");
+    Write(intResult);
+}

@@ -1,0 +1,135 @@
+call banners
+{
+    int[5][5]: a, b, c;
+    int: intD1a, intD2a;
+    int: intD1b, intD2b;
+    int: intOption;
+    int: intD1c, intD2c;
+    int: intAcum;
+}
+
+van Programa4()
+{
+    Write("Escriba la dimension 1 de la matriz a: ");
+    intD1a <= Read();
+
+    Write("Escriba la dimension 2 de la matriz a: ");
+    intD2a <= Read();
+
+    Write("Escriba la dimension 1 de la matriz b: ");
+    intD1b <= Read();
+
+    Write("Escriba la dimension 2 de la matriz b: ");
+    intD2b <= Read();
+
+	Write("a: ");
+    for (i <= 0 | i < intD1a)
+    {
+     	for (j <= 0 | j < intD2a)
+        {
+	    Write(i);
+		Write(j);
+		Write("-----");
+	    a[i][j] <= Read();
+	}
+    }
+
+	Write("b: ");
+    for (i <= 0 | i < intD1b)
+    {
+     	for (j <= 0 | j < intD2b)
+        {
+            Write(i);
+			Write(j);
+			Write("-----");
+	    b[i][j] <= Read();
+	}
+    }
+
+    Write("Elija la opcion: 1)Multiplicar matrices 2)Sumar matrices");
+    intOption <= Read();
+    if (intOption == 1)
+    {
+        Charge multiplicar();
+    }
+    else
+    {
+        Charge sumar();
+    }
+}
+
+host multiplicar()
+{
+    intD1c <= intD1a;
+    intD2c <= intD2b;
+    if (intD2a == intD1b)
+    {
+        for (i <= 0 | i < intD2c)
+		{
+			for (j <= 0 | j < intD1c)
+			{
+				intAcum <= 0;
+				for (k <= 0 | k < intD2a)
+				{
+					intAcum <= intAcum + a[k][i]*b[j][k];
+				}
+				Write(intAcum);
+				c[i][j] <= intAcum;
+			}
+		}
+
+		Write("c: ");
+		for (i <= 0 | i < intD1c)
+		{
+			for (j <= 0 | j < intD2c)
+			{
+				Write(c[j][i]);
+			}
+			
+			Write("----");
+		}
+    }
+    else
+    {
+        Write("No se pueden multiplicar.");
+    }
+}
+
+host sumar()
+{
+    intD1c <= intD1a;
+    intD2c <= intD2a;
+
+    if (intD1a == intD1b)
+    {
+        if (intD2a == intD2b)
+        {
+			for (i <= 0 | i < intD1a)
+			{
+				for (j <= 0 | j < intD2a)
+				{
+					c[i][j] <= a[i][j] + b[i][j];
+				}
+			}
+			
+			Write("c: ");
+			for (i <= 0 | i < intD1c)
+			{
+				for (j <= 0 | j < intD2c)
+				{
+					Write(c[j][i]);
+				}
+				
+				Write("----");
+			}
+        }
+		else
+		{
+			Write("No se pueden sumar.");
+		}
+    }
+    else
+    {
+		Write("No se pueden sumar.");
+    }
+}
