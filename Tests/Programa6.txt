@@ -1,0 +1,109 @@
+call banners
+{
+    int[5][5]: a, b, c;
+    int: intD1a, intD2a;
+    int: intD1b, intD2b;
+    int: intOption;
+    int: intD1c, intD2c;
+    int: intAcum;
+}
+
+van Programa4()
+{
+    Write("Escriba la dimension 1 de la matriz a: \n");
+    intD1a <= Read();
+
+    Write("Escriba la dimension 2 de la matriz a: \n");
+    intD2a <= Read();
+
+    Write("Escriba la dimension 1 de la matriz b: \n");
+    intD1b <= Read();
+
+    Write("Escriba la dimension 2 de la matriz b: \n");
+    intD2b <= Read();
+
+    for (i <= 0 | i < intD1a)
+    {
+     	for (j <= 0 | j < intD2a)
+        {
+	    Write("Escriba el valor de a[");
+            Write(i);
+            Write("][");
+            Write(j);
+            Write("]: \n");
+	    a[i][j] <= Read();
+	}
+    }
+
+    for (i <= 0 | i < intD1b)
+    {
+     	for (j <= 0 | j < intD2b)
+        {
+	    Write("Escriba el valor de b[");
+            Write(i);
+            Write("][");
+            Write(j);
+            Write("]: \n");
+	    b[i][j] <= Read();
+	}
+    }
+
+    Write("Elija la opcion: \n1)Multiplicar matrices\n2)Sumar matrices\n");
+    intOption <= Read();
+
+    if (intOption == 1)
+    {
+        Charge multiplicar();
+    }
+    else
+    {
+        Charge sumar();
+    }
+}
+
+host multiplicar()
+{
+    intD1c <= intD1a;
+    intD2c <= intD2b;
+
+    if (intD2a == intD1b)
+    {
+        for (i <= 0 | i < intD2c)
+	{
+	    intAcum <= 0;
+
+	    for (j <= 0 | j < intD1c)
+	    {
+		for (k <= 0 | k < intD2a)
+		{
+		    intAcum <= intAcum + a[i][k]*b[k][j];
+		}
+
+		c[i][j] <= intAcum;
+	    }
+	}
+
+	for (i <= 0 | i < intD1c)
+        {
+     	    for (j <= 0 | j < intD2c)
+            {
+	        Write("c[");
+	    	Write(i);
+	    	Write("][");
+	    	Write(j);
+	    	Write("]: ");
+	    	Write(c[i][j]);
+	    	Write("\n");
+	    }
+    	}
+    }
+    else
+    {
+        Write("No se pueden multiplicar.");
+    }
+}
+
+host sumar()
+{
+
+}

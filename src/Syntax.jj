@@ -1,0 +1,756 @@
+PARSER_BEGIN(Syntax)
+import java.util.*;
+class Syntax
+{
+    //                                                      //Symbol table format:
+    //                                                      // TYPE | DIMENSIONS | ID
+    static ArrayList<ArrayList<String>> lstlststrSymbolTable = new ArrayList<ArrayList<String>>();
+    static ArrayList<String> lststrToAdd;
+    static int intVariableCount = 0;
+    static String strCurrentVariableType;
+    static String strCurrentVariableDimension;
+
+    static Stack<String> stackOperands = new Stack<String>();
+    static Stack<String> stackOperators = new Stack<String>();
+    static Stack<String> stackTypes = new Stack<String>();
+    static Stack<Integer> stackJumps = new Stack<Integer>();
+    static ArrayList<ArrayList<String>> lstlststrQuadruples = new ArrayList<ArrayList<String>>();
+    static int intTemporalPointer = 0;
+    static String[] strTemporals = new String[500];
+    static int intInstructionCount = 0;
+    static String strCurrentMethod;
+
+    static Map<String, Integer> mapMethodLines = new HashMap<String, Integer>();
+    static Map<String, Integer> mapMethodLinesToReturn = new HashMap<String, Integer>();
+
+	public static void main(String[] args) throws ParseException
+	{
+		try
+		{
+			Syntax syntaxAnalizer = new Syntax(System.in);
+			syntaxAnalizer.Program();
+			System.out.println("Syntax is correct");
+		}
+		catch(ParseException e)
+		{
+			System.out.println(e.getMessage());
+			System.out.println("There are errors in the syntax.");
+		}
+
+        System.out.println();
+        System.out.println("--------------------Symbol Table--------------------");
+        System.out.println("\t#\t|\tType\t|     Dimension\t|\tID");
+
+        for (int intI = 0; intI < lstlststrSymbolTable.size(); intI++)
+        {
+            System.out.println("\t" + (intI + 1) + "\t|\t" +
+                lstlststrSymbolTable.get(intI).get(0) + "\t|\t" +
+                lstlststrSymbolTable.get(intI).get(1) + "\t|\t" +
+                lstlststrSymbolTable.get(intI).get(2));
+        }
+
+        System.out.println();
+        System.out.println("--------------------Quadruples--------------------");
+        System.out.println(" # |  Operator\t|   Operand 1\t|   Operand 2\t|      Result");
+
+        for (int intI = 0; intI < lstlststrQuadruples.size(); intI++)
+        {
+            System.out.println(" " + (intI + 1) + " |\t" +
+                lstlststrQuadruples.get(intI).get(0) + "\t|      " +
+                lstlststrQuadruples.get(intI).get(2) + "\t|      " +
+                lstlststrQuadruples.get(intI).get(1) + "\t|      " +
+                lstlststrQuadruples.get(intI).get(3));
+        }
+
+        System.out.println(" " + (lstlststrQuadruples.size() + 1) + " ...");
+
+        System.out.println();
+        System.out.println("--------------------Methods  and directions--------------------");
+        System.out.println(" # |  Method\t|   Direction");
+        int intAux = 1;
+        for (Map.Entry<String, Integer> entry : mapMethodLines.entrySet())
+        {
+            System.out.println(" " + intAux + " |   " + entry.getKey() + "\t|   " + entry.getValue());
+            intAux++;
+        }
+	}
+
+    private static boolean boolCheckSemanticsAndPush(String strType1, String strType2)
+    {
+        if (strType1.equals("int") &&
+            strType2.equals("int"))
+        {
+            stackTypes.push("int");
+            return true;
+        }
+        else if ((strType1.equals("int") &&
+            strType2.equals("double")) ||
+            (strType1.equals("double") &&
+            strType2.equals("int")) ||
+            (strType1.equals("double") &&
+            strType2.equals("double")))
+        {
+            stackTypes.push("double");
+            return true;
+        }
+        else if (strType1.equals("String") &&
+            strType2.equals("String"))
+        {
+            stackTypes.push("String");
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+}
+PARSER_END(Syntax)
+
+TOKEN:
+{	
+		<CALL: "call banners">{System.out.println("CALL -> " + image);}
+	|	<VAN: "van">{System.out.println("VAN -> " + image);}
+    |	<HOST: "host">{System.out.println("HOST -> " + image);}
+    |	<PLEDGE: "pledge">{System.out.println("PLEDGE -> " + image);}
+    |	<REAR: "rear">{System.out.println("REAR -> " + image);}
+}
+
+TOKEN:
+{	
+		<SCOUT: "Scout">{System.out.println("SCOUT -> " + image);}
+	|	<AT: "At">{System.out.println("AT -> " + image);}
+    |	<AS: "As">{System.out.println("AS -> " + image);}
+    |	<CLAIM: "Claim">{System.out.println("CLAIM -> " + image);}
+    |	<WHERE: "Where">{System.out.println("WHERE -> " + image);}
+    |	<ALL: "all">{System.out.println("ALL -> " + image);}
+}
+
+TOKEN:
+{	
+		<LBRACE: "{">{System.out.println("LBRACE -> " + image);}
+	|	<RBRACE: "}">{System.out.println("RBRACE -> " + image);}
+	|	<LPAR: "(">{System.out.println("LPAR -> " + image);}
+	|	<RPAR: ")">{System.out.println("RPAR -> " + image);}
+    |	<LSQUARE: "[">{System.out.println("LSQUARE -> " + image);}
+	|	<RSQUARE: "]">{System.out.println("RSQUARE -> " + image);}
+	|	<DOUBLECOLON: ":">{System.out.println("DOUBLECOLON -> " + image);}
+	|	<COMMA: ",">{System.out.println("COMMA -> " + image);}
+	|	<SEMICOLON: ";">{System.out.println("SEMICOLON -> " + image);}
+}
+
+TOKEN:
+{	
+		<INT: "int">{System.out.println("INT -> " + image);}
+    |	<STRING: "String">{System.out.println("STRING -> " + image);}
+    |	<NUM: "num">{System.out.println("NUM -> " + image);}
+}
+
+TOKEN:
+{	
+		<ASSIGNATION: "<=">{System.out.println("ASSIGNATION -> " + image + "\r\n");}
+	|	<PLUS: "+">{System.out.println("PLUS -> " + image);}
+    |	<MINUS: "-">{System.out.println("MINUS -> " + image);}
+    |	<MULT: "*">{System.out.println("MULT -> " + image);}
+    |	<DIV: "/">{System.out.println("DIV -> " + image);}
+    |	<LESSTHAN: "<">{System.out.println("LESSTHAN -> " + image);}
+    |	<MORETHAN: ">">{System.out.println("MORETHAN -> " + image);}
+    |	<EQUALS: "==">{System.out.println("EQUALS -> " + image);}
+    |	<NOTEQUALS: "!=">{System.out.println("NOTEQUALS -> " + image);}
+}
+
+TOKEN:
+{	
+		<WRITE: "Write">{System.out.println("WRITE -> " + image);}
+    |	<READ: "Read">{System.out.println("READ -> " + image);}
+    |	<CHARGE: "Charge">{System.out.println("CHARGE -> " + image);}
+}
+
+TOKEN:
+{	
+		<WHILE: "while">{System.out.println("WHILE -> " + image);}
+    |	<DO: "do">{System.out.println("DO -> " + image);}
+    |	<FOR: "for">{System.out.println("FOR -> " + image);}
+    |	<SEPARATOR: "|">{System.out.println("SEPARATOR -> " + image);}
+    |	<IF: "if">{System.out.println("IF -> " + image);}
+    |	<ELSE: "else">{System.out.println("ELSE -> " + image);}
+    |	<OR: "||">{System.out.println("OR -> " + image);}
+    |	<AND: "&&">{System.out.println("AND -> " + image);}
+}
+
+TOKEN:
+{	
+		<NUMBER: (["0"-"9"])+>{System.out.println("Number -> " + image + "\r\n");}
+	|	<ID: ["a"-"z","A"-"Z"](["a"-"z","A"-"Z","0"-"9","_"])*>{System.out.println("ID -> " + image + "\r\n");}
+}
+
+TOKEN: 
+{
+        <DOUBLEQUOTED: "\"" ("\\" ~[] | ~["\"","\\"])*"\"">{System.out.println("DOUBLEQUOTED -> " + image + "\r\n");} 
+}
+
+SKIP:
+{
+	" "|"\r\n"|"\t"
+}
+
+void Program() :
+{
+}
+{ 
+    Banners()<VAN><ID><LPAR><RPAR>B(){
+            lststrToAdd = new ArrayList<String>();
+            lststrToAdd.add("EOM");
+            lststrToAdd.add("_");
+            lststrToAdd.add("_");
+            lststrToAdd.add("_");
+            lstlststrQuadruples.add(lststrToAdd);
+            intInstructionCount++;
+        }
+        Methods()Rear()<EOF>
+}
+
+void Banners() :
+{
+}
+{
+	(<CALL><LBRACE>(Type()<DOUBLECOLON><ID>{lststrToAdd = new ArrayList<String>();
+                                            lststrToAdd.add(strCurrentVariableType);
+                                            lststrToAdd.add(strCurrentVariableDimension);
+                                            lststrToAdd.add(token.toString());
+                                            lstlststrSymbolTable.add(lststrToAdd);
+                                            intVariableCount++;}
+    (<COMMA><ID>{lststrToAdd = new ArrayList<String>();
+                lststrToAdd.add(strCurrentVariableType);
+                lststrToAdd.add(strCurrentVariableDimension);
+                lststrToAdd.add(token.toString());
+                lstlststrSymbolTable.add(lststrToAdd);})*<SEMICOLON>)+<RBRACE>)?
+}
+
+void Type() :
+{
+}
+{
+    ((<INT>{strCurrentVariableType = "int";
+            strCurrentVariableDimension = "0";})
+        ((<LSQUARE><NUMBER>{strCurrentVariableDimension = "1(" + token.toString() + ")";}<RSQUARE>)
+        (<LSQUARE><NUMBER>{strCurrentVariableDimension = "2" + strCurrentVariableDimension.substring(1, 3) +
+                            "x" + token.toString() + ")";}<RSQUARE>)?)?) |
+    ((<STRING>{strCurrentVariableType = "String";
+            strCurrentVariableDimension = "0";})
+        (<LSQUARE><NUMBER>{strCurrentVariableDimension = "1(" + token.toString() + ")";}<RSQUARE>)?) |
+    ((<NUM>{strCurrentVariableType = "double";
+            strCurrentVariableDimension = "0";}) |
+        (<LSQUARE><NUMBER>{strCurrentVariableDimension = "1(" + token.toString() + ")";}<RSQUARE>)?)
+}
+
+void B() :
+{
+}
+{
+	<LBRACE>(((S()))+)?<RBRACE>
+}
+
+void S() :
+{
+}
+{
+    //                                                      //Assignation and read
+	((Variable()<ASSIGNATION>{stackOperators.push(token.toString());})
+    ((E()) | (<READ>{stackOperands.push("Sys.in");
+                    stackOperators.push("Read");}
+                    <LPAR><RPAR>)) <SEMICOLON>{lststrToAdd = new ArrayList<String>();
+                                                lststrToAdd.add(stackOperators.pop());
+                                                lststrToAdd.add("_");
+                                                lststrToAdd.add(stackOperands.pop());
+                                                String strOperandToTest = stackOperands.pop();
+
+                                                if (strOperandToTest.charAt(0) == '[')
+                                                {
+                                                    strOperandToTest = stackOperands.pop() + strOperandToTest;
+
+                                                    if (strOperandToTest.charAt(0) == '[')
+                                                    {
+                                                        strOperandToTest = stackOperands.pop() + strOperandToTest;
+                                                    }
+                                                }
+
+                                                lststrToAdd.add(strOperandToTest);
+                                                lstlststrQuadruples.add(lststrToAdd);
+                                                intInstructionCount++;}) | 
+    (<WRITE>{stackOperators.push("Write");}<LPAR>E()<RPAR><SEMICOLON>
+        {lststrToAdd = new ArrayList<String>();
+        lststrToAdd.add(stackOperators.pop());
+        lststrToAdd.add("_");
+        strOperandToTest = stackOperands.pop();
+
+        if (strOperandToTest.charAt(0) == '[')
+        {
+            strOperandToTest = stackOperands.pop() + strOperandToTest;
+
+            if (strOperandToTest.charAt(0) == '[')
+            {
+                strOperandToTest = stackOperands.pop() + strOperandToTest;
+            }
+        }
+
+        lststrToAdd.add(strOperandToTest);
+        lststrToAdd.add("Console");
+        lstlststrQuadruples.add(lststrToAdd);
+        intInstructionCount++;}) |
+
+    //                                                      //IF
+    (((<IF>{stackOperators.push("If");}
+        <LPAR>E()<RPAR>{String strOperand = stackOperands.pop();
+                String strType = stackTypes.pop();
+                if (strType.equals("boolean"))
+                {
+                    lststrToAdd = new ArrayList<String>();
+                    lststrToAdd.add("gotof");
+                    lststrToAdd.add("_");
+                    lststrToAdd.add(strOperand);
+                    stackJumps.push(intInstructionCount);
+                    lstlststrQuadruples.add(lststrToAdd);
+                    intInstructionCount++;
+                }}
+    B())(<ELSE>
+            {
+                stackOperators.push("Else");
+                lststrToAdd = new ArrayList<String>();
+                lststrToAdd.add("goto");
+                lststrToAdd.add("_");
+                lststrToAdd.add("_");
+                stackJumps.push(intInstructionCount);
+                lstlststrQuadruples.add(lststrToAdd);
+                intInstructionCount++;
+            }
+        B())?){
+                    //                                      //Take out the "Else" or "If" operator.
+                    stackOperators.pop();
+                    int intDirToFill;
+
+                    if (stackOperators.size() > 0 &&
+                        stackOperators.peek().equals("If"))
+                    {
+                        intDirToFill = stackJumps.pop();
+                        lstlststrQuadruples.get(intDirToFill).add((intInstructionCount + 1) + "");
+
+                        intDirToFill = stackJumps.pop();
+                        lstlststrQuadruples.get(intDirToFill).add((intInstructionCount) + "");
+
+                        //                                  //Take out the "Else" operator.
+                        stackOperators.pop();
+                    }
+                    else
+                    {
+                        intDirToFill = stackJumps.pop();
+                        lstlststrQuadruples.get(intDirToFill).add((intInstructionCount + 1) + "");
+                    }
+            }) |
+    (<WHILE>{stackOperators.push("While");}
+        <LPAR>E()<RPAR>{
+                strOperand = stackOperands.pop();
+                strType = stackTypes.pop();
+                if (strType.equals("boolean"))
+                {
+                    lststrToAdd = new ArrayList<String>();
+                    lststrToAdd.add("gotof");
+                    lststrToAdd.add("_");
+                    lststrToAdd.add(strOperand);
+                    stackJumps.push(intInstructionCount);
+                    lstlststrQuadruples.add(lststrToAdd);
+                    intInstructionCount++;
+                }}
+        B(){
+                    lststrToAdd = new ArrayList<String>();
+                    lststrToAdd.add("goto");
+                    lststrToAdd.add("_");
+                    lststrToAdd.add("_");
+                    intDirToFill = stackJumps.pop();
+                    lststrToAdd.add(intDirToFill + "");
+                    lstlststrQuadruples.add(lststrToAdd);
+                    intInstructionCount++;
+                    lstlststrQuadruples.get(intDirToFill).add((intInstructionCount + 1) + "");
+            }) |
+    (<DO>{stackJumps.push(intInstructionCount + 1);}
+        B()<WHILE>E(){strOperand = stackOperands.pop();
+                    strType = stackTypes.pop();
+                    if (strType.equals("boolean"))
+                    {
+                        lststrToAdd = new ArrayList<String>();
+                        lststrToAdd.add("gotot");
+                        lststrToAdd.add("_");
+                        lststrToAdd.add(strOperand);
+                        lststrToAdd.add(stackJumps.pop() + "");
+                        lstlststrQuadruples.add(lststrToAdd);
+                        intInstructionCount++;
+                    }}) |
+    (<READ>{stackOperands.push("Sys.in");
+            stackOperators.push("Read");}
+    <LPAR><RPAR><SEMICOLON>{lststrToAdd = new ArrayList<String>();
+                            lststrToAdd.add(stackOperators.pop());
+                            lststrToAdd.add("_");
+                            lststrToAdd.add(stackOperands.pop());
+                            lststrToAdd.add(stackOperands.pop());
+                            lstlststrQuadruples.add(lststrToAdd);
+                            intInstructionCount++;}
+                            ) |
+    (<FOR><LPAR><ID>{lststrToAdd = new ArrayList<String>();
+                    lststrToAdd.add("For");
+                    lststrToAdd.add("_");
+                    lststrToAdd.add("_");
+                    lststrToAdd.add(token.toString());
+                    stackOperands.push(token.toString());
+                    lstlststrQuadruples.add(lststrToAdd);
+                    intInstructionCount++;}
+        <ASSIGNATION>{stackOperators.push(token.toString());}
+        E(){lststrToAdd = new ArrayList<String>();
+            lststrToAdd.add(stackOperators.pop());
+            lststrToAdd.add("_");
+            lststrToAdd.add(stackOperands.pop());
+            lststrToAdd.add(stackOperands.pop());
+            lstlststrQuadruples.add(lststrToAdd);
+            intInstructionCount++;
+            stackJumps.push(intInstructionCount);}
+            <SEPARATOR>E(){
+                strOperand = stackOperands.pop();
+                strType = stackTypes.pop();
+                if (strType.equals("boolean"))
+                {
+                    lststrToAdd = new ArrayList<String>();
+                    lststrToAdd.add("gotof");
+                    lststrToAdd.add("_");
+                    lststrToAdd.add(strOperand);
+                    stackJumps.push(intInstructionCount);
+                    lstlststrQuadruples.add(lststrToAdd);
+                    intInstructionCount++;
+                }}
+            <RPAR>B(){
+                    intDirToFill = stackJumps.pop();
+                    lstlststrQuadruples.get(intDirToFill).add((intInstructionCount + 3) + "");
+                    lststrToAdd = new ArrayList<String>();
+                    lststrToAdd.add("+");
+                    lststrToAdd.add("1");
+                    lststrToAdd.add("i");
+                    lststrToAdd.add("i");
+                    lstlststrQuadruples.add(lststrToAdd);
+                    intInstructionCount++;
+
+                    lststrToAdd = new ArrayList<String>();
+                    lststrToAdd.add("goto");
+                    lststrToAdd.add("_");
+                    lststrToAdd.add("_");
+                    lststrToAdd.add((stackJumps.pop() + 1) + "");
+                    lstlststrQuadruples.add(lststrToAdd);
+                    intInstructionCount++;
+                }) |
+    (<CHARGE><ID>{
+        lststrToAdd = new ArrayList<String>();
+        lststrToAdd.add("goto");
+        lststrToAdd.add("_");
+        lststrToAdd.add("method");
+        lststrToAdd.add(token.toString());
+        intInstructionCount++;
+        lstlststrQuadruples.add(lststrToAdd);
+        mapMethodLinesToReturn.put(token.toString(), intInstructionCount + 1);
+        }
+        <LPAR><RPAR><SEMICOLON>)
+}
+
+void Variable() :
+{
+}
+{
+    ((<ID>{stackOperands.push(token.toString());
+            for (int intI = 0; intI < lstlststrSymbolTable.size(); intI++)
+            {
+                if (lstlststrSymbolTable.get(intI).get(2).equals(token.toString()))
+                {
+                    stackTypes.push(lstlststrSymbolTable.get(intI).get(0));
+                    break;
+                }
+            }}) 
+        ((<LSQUARE>{stackOperators.push("[");}ES(){
+            String strOperand = stackOperands.pop();
+            stackOperands.push("[" + strOperand + "]");}
+            <RSQUARE>{stackOperators.pop();})(<LSQUARE>{stackOperators.push("[");}ES(){
+            strOperand = stackOperands.pop();
+            stackOperands.push("[" + strOperand + "]");}
+            <RSQUARE>{stackOperators.pop();})?)?)
+}
+
+void E() :
+{
+}
+{
+	(ES())
+    ((<LESSTHAN>{stackOperators.push(token.toString());}
+    ES(){lststrToAdd = new ArrayList<String>();
+        lststrToAdd.add(stackOperators.pop());
+        lststrToAdd.add(stackOperands.pop());
+        lststrToAdd.add(stackOperands.pop());
+        lststrToAdd.add("t" + intTemporalPointer);
+        lstlststrQuadruples.add(lststrToAdd);
+        intInstructionCount++;
+        stackOperands.push("t" + intTemporalPointer);
+        intTemporalPointer++;
+        stackTypes.push("boolean");}
+        ) |
+    (<MORETHAN>{stackOperators.push(token.toString());}
+    ES(){lststrToAdd = new ArrayList<String>();
+        lststrToAdd.add(stackOperators.pop());
+        lststrToAdd.add(stackOperands.pop());
+        lststrToAdd.add(stackOperands.pop());
+        lststrToAdd.add("t" + intTemporalPointer);
+        lstlststrQuadruples.add(lststrToAdd);
+        intInstructionCount++;
+        stackOperands.push("t" + intTemporalPointer);
+        intTemporalPointer++;
+        stackTypes.push("boolean");}) |
+    (<EQUALS>{stackOperators.push(token.toString());}
+    ES(){lststrToAdd = new ArrayList<String>();
+        lststrToAdd.add(stackOperators.pop());
+        lststrToAdd.add(stackOperands.pop());
+        lststrToAdd.add(stackOperands.pop());
+        lststrToAdd.add("t" + intTemporalPointer);
+        lstlststrQuadruples.add(lststrToAdd);
+        intInstructionCount++;
+        stackOperands.push("t" + intTemporalPointer);
+        intTemporalPointer++;
+        stackTypes.push("boolean");}) |
+    (<NOTEQUALS>{stackOperators.push(token.toString());}
+    ES(){lststrToAdd = new ArrayList<String>();
+        lststrToAdd.add(stackOperators.pop());
+        lststrToAdd.add(stackOperands.pop());
+        lststrToAdd.add(stackOperands.pop());
+        lststrToAdd.add("t" + intTemporalPointer);
+        lstlststrQuadruples.add(lststrToAdd);
+        intInstructionCount++;
+        stackOperands.push("t" + intTemporalPointer);
+        intTemporalPointer++;
+        stackTypes.push("boolean");}
+    ))?
+}
+
+void ES() :
+{
+}
+{
+	T(){if (stackOperators.peek() == "+" ||
+            stackOperators.peek() == "-")
+        {
+            lststrToAdd = new ArrayList<String>();
+            lststrToAdd.add(stackOperators.pop());
+            lststrToAdd.add(stackOperands.pop());
+            lststrToAdd.add(stackOperands.pop());
+            lststrToAdd.add("t" + intTemporalPointer);
+            lstlststrQuadruples.add(lststrToAdd);
+            intInstructionCount++;
+            stackOperands.push("t" + intTemporalPointer);
+            intTemporalPointer++;
+
+            String strTypes1 = stackTypes.pop();
+            String strTypes2 = stackTypes.pop();
+            if (!boolCheckSemanticsAndPush(strTypes1, strTypes2))
+            {
+                System.out.println("Error: Operation with non-permited types: " + strTypes1 + " and " + strTypes2);
+                System.exit(0);
+            }}
+        }((<PLUS>{stackOperators.push(token.toString());}T(){if (stackOperators.peek() == "+" ||
+            stackOperators.peek() == "-")
+        {
+            lststrToAdd = new ArrayList<String>();
+            lststrToAdd.add(stackOperators.pop());
+
+            String strOperandToTest1 = stackOperands.pop();
+            if (strOperandToTest1.charAt(0) == '[')
+            {
+                strOperandToTest1 = stackOperands.pop() + strOperandToTest1;
+
+                if (strOperandToTest1.charAt(0) == '[')
+                {
+                    strOperandToTest1 = stackOperands.pop() + strOperandToTest1;
+                }
+            }
+
+            String strOperandToTest2 = stackOperands.pop();
+            if (strOperandToTest2.charAt(0) == '[')
+            {
+                strOperandToTest2 = stackOperands.pop() + strOperandToTest2;
+
+                if (strOperandToTest2.charAt(0) == '[')
+                {
+                    strOperandToTest2 = stackOperands.pop() + strOperandToTest2;
+                }
+            }
+
+            lststrToAdd.add(strOperandToTest1);
+            lststrToAdd.add(strOperandToTest2);
+
+            lststrToAdd.add("t" + intTemporalPointer);
+            lstlststrQuadruples.add(lststrToAdd);
+            intInstructionCount++;
+            stackOperands.push("t" + intTemporalPointer);
+            intTemporalPointer++;
+
+            String strTypes1 = stackTypes.pop();
+            String strTypes2 = stackTypes.pop();
+            if (!boolCheckSemanticsAndPush(strTypes1, strTypes2))
+            {
+                System.out.println("Error: Operation with non-permited types: " + strTypes1 + " and " + strTypes2);
+                System.exit(0);
+            }}
+        }) | 
+    (<MINUS>{stackOperators.push(token.toString());}T(){if (stackOperators.peek() == "+" ||
+            stackOperators.peek() == "-")
+        {
+            lststrToAdd = new ArrayList<String>();
+            lststrToAdd.add(stackOperators.pop());
+            lststrToAdd.add(stackOperands.pop());
+            lststrToAdd.add(stackOperands.pop());
+            lststrToAdd.add("t" + intTemporalPointer);
+            lstlststrQuadruples.add(lststrToAdd);
+            intInstructionCount++;
+            stackOperands.push("t" + intTemporalPointer);
+            intTemporalPointer++;
+
+            String strTypes1 = stackTypes.pop();
+            String strTypes2 = stackTypes.pop();
+            if (!boolCheckSemanticsAndPush(strTypes1, strTypes2))
+            {
+                System.out.println("Error: Operation with non-permited types: " + strTypes1 + " and " + strTypes2);
+                System.exit(0);
+            }}
+        }) | 
+    (<OR>{stackOperators.push(token.toString());}T()){if (stackOperators.peek() == "+" ||
+            stackOperators.peek() == "-")
+        {
+            lststrToAdd = new ArrayList<String>();
+            lststrToAdd.add(stackOperators.pop());
+            lststrToAdd.add(stackOperands.pop());
+            lststrToAdd.add(stackOperands.pop());
+            lststrToAdd.add("t" + intTemporalPointer);
+            lstlststrQuadruples.add(lststrToAdd);
+            intInstructionCount++;
+            stackOperands.push("t" + intTemporalPointer);
+            intTemporalPointer++;
+
+            String strTypes1 = stackTypes.pop();
+            String strTypes2 = stackTypes.pop();
+            if (!boolCheckSemanticsAndPush(strTypes1, strTypes2))
+            {
+                System.out.println("Error: Operation with non-permited types: " + strTypes1 + " and " + strTypes2);
+                System.exit(0);
+            }}
+        })*
+}
+
+void T() :
+{
+}
+{
+	f()
+    {if (stackOperators.peek() == "*" ||
+            stackOperators.peek() == "/")
+    {
+        lststrToAdd = new ArrayList<String>();
+        lststrToAdd.add(stackOperators.pop());
+        lststrToAdd.add(stackOperands.pop());
+        lststrToAdd.add(stackOperands.pop());
+        lststrToAdd.add("t" + intTemporalPointer);
+        lstlststrQuadruples.add(lststrToAdd);
+        intInstructionCount++;
+        stackOperands.push("t" + intTemporalPointer);
+        intTemporalPointer++;
+
+        String strTypes1 = stackTypes.pop();
+        String strTypes2 = stackTypes.pop();
+        if (!boolCheckSemanticsAndPush(strTypes1, strTypes2))
+        {
+            System.out.println("Error: Operation with non-permited types: " + strTypes1 + " and " + strTypes2);
+            System.exit(0);
+        }}
+    }
+    (((<MULT>{stackOperators.push(token.toString());}) | 
+        (<DIV>{stackOperators.push(token.toString());}) | 
+        (<AND>{stackOperators.push(token.toString());}))
+    f(){if (stackOperators.peek() == "*" ||
+        stackOperators.peek() == "/")
+    {
+        lststrToAdd = new ArrayList<String>();
+        lststrToAdd.add(stackOperators.pop());
+        lststrToAdd.add(stackOperands.pop());
+        lststrToAdd.add(stackOperands.pop());
+        lststrToAdd.add("t" + intTemporalPointer);
+        lstlststrQuadruples.add(lststrToAdd);
+        intInstructionCount++;
+        stackOperands.push("t" + intTemporalPointer);
+        intTemporalPointer++;
+
+        String strTypes1 = stackTypes.pop();
+        String strTypes2 = stackTypes.pop();
+        if (!boolCheckSemanticsAndPush(strTypes1, strTypes2))
+        {
+            System.out.println("Error: Operation with non-permited types: " + strTypes1 + " and " + strTypes2);
+            System.exit(0);
+        }}
+    })*
+}
+
+void f() :
+{
+}
+{
+	(LOOKAHEAD(2)Variable() | 
+    (<ID><LPAR><RPAR>)|
+    (<NUMBER>{stackOperands.push(token.toString());})|
+    (<LPAR>{stackOperators.push("(");}E()<RPAR>{stackOperators.pop();})|
+    (<DOUBLEQUOTED>{stackOperands.push(token.toString());}))
+}
+
+void Methods() :
+{
+}
+{
+    (((<HOST><ID>{
+        mapMethodLines.put(token.toString(), intInstructionCount + 1);
+        strCurrentMethod = token.toString();}
+        <LPAR><RPAR>B())
+    (<PLEDGE>E())?){
+        lststrToAdd = new ArrayList<String>();
+        lststrToAdd.add("goto");
+        lststrToAdd.add("_");
+        lststrToAdd.add("_");
+        intInstructionCount++;
+        lststrToAdd.add(mapMethodLinesToReturn.get(strCurrentMethod) + "");
+        lstlststrQuadruples.add(lststrToAdd);
+        })*
+}
+
+void Rear() :
+{
+}
+{
+    (<REAR><ID><LPAR><RPAR><LBRACE>((Q())*)<RBRACE>)?
+}
+
+void Q() :
+{
+}
+{
+    (Sel()|Ins())
+}
+
+void Sel() :
+{
+}
+{
+    <SCOUT>(<ALL>|<ID>)(<COMMA><ID>)*<SEMICOLON><AT><ID><SEMICOLON><WHERE>E()<SEMICOLON>
+}
+
+void Ins() :
+{
+}
+{
+    <CLAIM><ID>(<COMMA><ID>)*<SEMICOLON><AT><ID><SEMICOLON><AS>E()(<COMMA>E())*<SEMICOLON>
+}

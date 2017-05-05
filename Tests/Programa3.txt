@@ -1,0 +1,21 @@
+call banners
+{
+    int: a, b;
+    String: str;
+}
+
+van Programa3()
+{
+    a<=1;
+    b<=1;
+    str<="Hola";
+    
+    if (a == b)
+    {
+        Write(str);
+    }
+    else
+    {
+        Write("Adios");
+    }
+}
