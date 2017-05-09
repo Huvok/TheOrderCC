@@ -21,6 +21,7 @@ class Syntax
     static int[] intTemporals = new int[500];
     static int intInstructionCount = 0;
     static String strCurrentMethod;
+    static Stack<Integer> stackMethods = new Stack<Integer>();
 
     static Map<String, Integer> mapMethodLines = new HashMap<String, Integer>();
     static Map<String, Integer> mapMethodLinesToReturn = new HashMap<String, Integer>();
@@ -1015,6 +1016,7 @@ void S() :
         intInstructionCount++;
         lstlststrQuadruples.add(lststrToAdd);
         mapMethodLinesToReturn.put(token.toString(), intInstructionCount + 1);
+        stackMethods.push(intInstructionCount + 1);
         }
         <LPAR><RPAR><SEMICOLON>)
 }
@@ -1335,7 +1337,11 @@ void Methods() :
         lststrToAdd.add("_");
         lststrToAdd.add("_");
         intInstructionCount++;
-        lststrToAdd.add(mapMethodLinesToReturn.get(strCurrentMethod) + "");
+        if (stackMethods.peek() == intInstructionCount)
+        {
+            stackMethods.pop();
+        }
+        lststrToAdd.add(stackMethods.pop() + "");
         lstlststrQuadruples.add(lststrToAdd);
         })*
 }

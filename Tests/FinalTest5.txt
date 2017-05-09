@@ -1,0 +1,22 @@
+call banners
+{
+    int: f, x;
+}
+
+van Programa4()
+{
+	f <= 1;
+	x <= 5;
+    Charge fact();
+	Write(f);
+}
+
+host fact()
+{
+	if (x > 1)
+	{
+		f <= f * x;
+		x <= x  - 1;
+		Charge fact();
+	}
+}
